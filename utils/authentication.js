@@ -1,0 +1,99 @@
+const jwt = require("jsonwebtoken");
+
+const timeForExchange = 60 * 60 * 24 * 180;
+const timeForAccess = 60 * 60 * 2;
+
+function getTokenTypeFromTimeDifference(timeDifference){
+	switch (timeDifference){
+		case timeForExchange:
+			return 'exchange'
+		default:
+			return 'access'
+	}
+}
+
+function getTimeForType(type){
+	switch (type){
+		case 'access':
+			return timeForAccess
+		case 'exchange':
+			return timeForExchange
+		default:
+			throw new Error('You need to pass in a valid getTimeForType type')
+	}
+}
+
+function getOptionsForTokenType(type){
+	const expiresIn = getTimeForType(type)
+
+	switch (type){
+		case 'access':
+		case 'exchange':
+			return { expiresIn }
+		default:
+			throw new Error('You need to pass in a valid getOptionsForTokenType type')
+	}
+}
+
+const extractTokenFromHeader = header => {
+	if (!header) { return }
+	const [scheme, token] = header.split(" ");
+
+	if (/^Bearer$/i.test(scheme)) {
+		return token;
+	}
+};
+
+// OUTCOMES:
+// returns null (no auth need + no user returned)
+// Throws error (if bad or expired token)
+// Sets + returns the user
+const verifyToken = ({ req, passedInToken }) => {
+	const token = passedInToken || extractTokenFromHeader(req.headers.authorization);
+	
+	if (!token) { return }
+
+	const cert = process.env.PUBLIC_JWT;
+
+	if (!cert) { throw new Error('JWT File not setup') }
+
+	try{
+		const decodedToken = jwt.verify(token, cert, { algorithms: ['RS256'] });
+
+		if (!(decodedToken.exp && decodedToken.iat && decodedToken.sub)) { 
+			throw new Error('Invalid JWT Token')
+		}
+	
+		return {
+			...decodedToken,
+			tokenType: getTokenTypeFromTimeDifference(decodedToken.exp - decodedToken.iat)
+		}
+	} catch (error){
+		throw new Error('Invalid JWT Token')
+	}
+
+};
+
+// OUTCOMES:
+// Throws error (if could not sign token)
+// returns token for
+const createToken = ({ req, res, user, type }) => {
+	if (!(user && user.id)) { throw new Error('Need to pass user details')}
+
+	const privateKey = process.env.PRIVATE_JWT;
+
+	if (!privateKey) { throw new Error('JWT File not setup') }
+
+	const playload = {
+		sub: user.id
+	};
+
+	return jwt.sign(playload, privateKey, { algorithm: 'RS256', ...getOptionsForTokenType(type) });
+};
+
+module.exports = {
+	extractTokenFromHeader,
+	verifyToken,
+	getTimeForType,
+	createToken,
+}

@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const timeForExchange = 60 * 60 * 24 * 180;
 const timeForAccess = 60 * 60 * 2;
 
-function getTokenTypeFromTimeDifference(timeDifference){
+function getTokenTypeFromTimeDifference(timeDifference: number): string {
 	switch (timeDifference){
 		case timeForExchange:
 			return 'exchange'
@@ -12,7 +12,7 @@ function getTokenTypeFromTimeDifference(timeDifference){
 	}
 }
 
-function getTimeForType(type){
+function getTimeForType(type: string): number {
 	switch (type){
 		case 'access':
 			return timeForAccess
@@ -23,7 +23,7 @@ function getTimeForType(type){
 	}
 }
 
-function getOptionsForTokenType(type){
+function getOptionsForTokenType(type: string): { expiresIn: number } {
 	const expiresIn = getTimeForType(type)
 
 	switch (type){
@@ -35,7 +35,7 @@ function getOptionsForTokenType(type){
 	}
 }
 
-const extractTokenFromHeader = header => {
+const extractTokenFromHeader = (header: string | null): string | undefined => {
 	if (!header) { return }
 	const [scheme, token] = header.split(" ");
 
@@ -44,12 +44,22 @@ const extractTokenFromHeader = header => {
 	}
 };
 
+type VerifyTokenParams = {
+	req: Request;
+	passedInToken: string;
+}
+
+type VerifyTokenResponse = {
+	sub: string;
+	tokenType: string;
+}
+
 // OUTCOMES:
 // returns null (no auth need + no user returned)
 // Throws error (if bad or expired token)
 // Sets + returns the user
-const verifyToken = ({ req, passedInToken }) => {
-	const token = passedInToken || extractTokenFromHeader(req.headers.authorization);
+const verifyToken = ({ req, passedInToken }: VerifyTokenParams): VerifyTokenResponse | undefined => {
+	const token = passedInToken || extractTokenFromHeader(req.headers.get('authorization'));
 	
 	if (!token) { return }
 
@@ -71,13 +81,12 @@ const verifyToken = ({ req, passedInToken }) => {
 	} catch (error){
 		throw new Error('Invalid JWT Token')
 	}
-
 };
 
 // OUTCOMES:
 // Throws error (if could not sign token)
 // returns token for
-const createToken = ({ req, res, user, type }) => {
+const createToken = ({ user, type }) => {
 	if (!(user && user.id)) { throw new Error('Need to pass user details')}
 
 	const privateKey = process.env.PRIVATE_JWT;
@@ -90,10 +99,3 @@ const createToken = ({ req, res, user, type }) => {
 
 	return jwt.sign(playload, privateKey, { algorithm: 'RS256', ...getOptionsForTokenType(type) });
 };
-
-module.exports = {
-	extractTokenFromHeader,
-	verifyToken,
-	getTimeForType,
-	createToken,
-}

@@ -1,6 +1,7 @@
-function up(knex) {
-  return Promise.all([
-    knex.schema
+import { Knex } from 'knex';
+
+export async function up(knex: Knex): Promise<void> {
+  await knex.schema
     .createTable('comicissue', (table) => {
       table.bigIncrements('id', { primaryKey: false });
       table.uuid('uuid').primary();
@@ -23,17 +24,9 @@ function up(knex) {
       table.index(['id']);
       table.index(['series_uuid']);
       table.index(['position']);
-    }),
-  ]);
+    });
 }
 
-function down(knex) {
-  return Promise.all([
-    knex.schema.dropTable('comicissue'),
-  ]);
-}
-
-module.exports = {
-  up,
-  down
+export async function down(knex: Knex): Promise<void> {
+  await knex.schema.dropTable('comicissue');
 }

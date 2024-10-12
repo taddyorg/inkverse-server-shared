@@ -7,10 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.js",
     "prod": "node server.js",
-    "migrate": "knex --knexfile ./database/config.js migrate:latest",
-    "knex-rollback": "node ./database/listLastBatchMigrations.js",
-    "migration-list": "knex --knexfile ./database/config.js migrate:list"
+    "migrate": "tsx ./node_modules/.bin/knex --knexfile ./database/config.ts migrate:latest",
+    "migrate:rollback": "tsx ./database/list-last-batch-migrations.ts",
+    "migration-list": "tsx ./node_modules/.bin/knex --knexfile ./database/config.ts migrate:list"
   },
+  "type": "module",
   "author": "Inkverse",
   "license": "AGPL-3.0",
   "dependencies": {
@@ -36,5 +37,8 @@
     "redis": "^4.7.0",
     "sharp": "^0.33.5",
     "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^3.12.7"
   }
 }

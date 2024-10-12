@@ -1,4 +1,4 @@
-import database from './index';
+import database from './index.js';
 import readline from 'readline';
 
 async function listLastBatchMigrations(): Promise<void> {

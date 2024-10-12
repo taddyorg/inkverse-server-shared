@@ -1,5 +1,5 @@
 import { SendEmailCommand } from "@aws-sdk/client-sesv2";
-import { emailCient } from "./setup";
+import { emailCient } from "./setup.js";
 
 enum EMAIL_AUDIENCE {
   GENERAL = 'General',

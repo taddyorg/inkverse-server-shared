@@ -1,4 +1,5 @@
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
+import type { JwtPayload } from "jsonwebtoken";
 
 const timeForExchange = 60 * 60 * 24 * 180;
 const timeForAccess = 60 * 60 * 2;
@@ -39,7 +40,7 @@ const extractTokenFromHeader = (header: string | null): string | undefined => {
 	if (!header) { return }
 	const [scheme, token] = header.split(" ");
 
-	if (/^Bearer$/i.test(scheme)) {
+	if (scheme && /^Bearer$/i.test(scheme)) {
 		return token;
 	}
 };
@@ -49,7 +50,7 @@ type VerifyTokenParams = {
 	passedInToken: string;
 }
 
-type VerifyTokenResponse = {
+type VerifyTokenResponse = JwtPayload & {
 	sub: string;
 	tokenType: string;
 }
@@ -58,7 +59,7 @@ type VerifyTokenResponse = {
 // returns null (no auth need + no user returned)
 // Throws error (if bad or expired token)
 // Sets + returns the user
-const verifyToken = ({ req, passedInToken }: VerifyTokenParams): VerifyTokenResponse | undefined => {
+export const verifyToken = ({ req, passedInToken }: VerifyTokenParams): VerifyTokenResponse | undefined => {
 	const token = passedInToken || extractTokenFromHeader(req.headers.get('authorization'));
 	
 	if (!token) { return }
@@ -68,7 +69,7 @@ const verifyToken = ({ req, passedInToken }: VerifyTokenParams): VerifyTokenResp
 	if (!cert) { throw new Error('JWT File not setup') }
 
 	try{
-		const decodedToken = jwt.verify(token, cert, { algorithms: ['RS256'] });
+		const decodedToken = jwt.verify(token, cert, { algorithms: ['RS256'] }) as JwtPayload;
 
 		if (!(decodedToken.exp && decodedToken.iat && decodedToken.sub)) { 
 			throw new Error('Invalid JWT Token')
@@ -77,7 +78,7 @@ const verifyToken = ({ req, passedInToken }: VerifyTokenParams): VerifyTokenResp
 		return {
 			...decodedToken,
 			tokenType: getTokenTypeFromTimeDifference(decodedToken.exp - decodedToken.iat)
-		}
+		} as VerifyTokenResponse
 	} catch (error){
 		throw new Error('Invalid JWT Token')
 	}
@@ -86,7 +87,7 @@ const verifyToken = ({ req, passedInToken }: VerifyTokenParams): VerifyTokenResp
 // OUTCOMES:
 // Throws error (if could not sign token)
 // returns token for
-const createToken = ({ user, type }) => {
+export const createToken = ({ user, type }: { user: any, type: string }) => {
 	if (!(user && user.id)) { throw new Error('Need to pass user details')}
 
 	const privateKey = process.env.PRIVATE_JWT;

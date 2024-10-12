@@ -1,15 +1,16 @@
-const sharp = require('sharp');
-const axios = require('axios')
-
-const database = require('../database')
-const { getImageUrl } = require('../../public/utils')
-const { ComicStory } = require('../models')
-
-async function getMultipleHeightAndWidths({ comicstories }){
-    const trx = await database.transaction()
+import sharp, { type Metadata } from 'sharp';
+import axios, { type AxiosRequestConfig } from 'axios';
+import { Knex } from 'knex';
+import database from '../database/index.js';
+import type { ComicStory } from '../../public/models/comicstory.js';
+import { getStoryImageUrl } from '../../public/models/comicstory.js';
+import { updateMultipleComicStories } from '../models/comicstory.js';
+    
+async function getMultipleHeightAndWidths(comicstories: ComicStory[] ) {
+    const trx: Knex.Transaction = await database.transaction()
     try{
 
-        const savedComicStories = [];
+        const savedComicStories: ComicStory[] = [];
 
         for (let index = 0; index < comicstories.length; index++) {
             const comicstory = comicstories[index];
@@ -30,15 +31,17 @@ async function getMultipleHeightAndWidths({ comicstories }){
             throw new Error('getMultipleHeightAndWidths issueUuid or seriesUuid !== 1')
         }
 
-        const safeSavedComicStories = savedComicStories.map(comicstory => {
+        const safeSavedComicStories: ComicStory[] = savedComicStories.map(comicstory => {
             return { 
                 uuid: comicstory.uuid,
+                issueUuid,
+                seriesUuid,
                 width: comicstory.width,
                 height: comicstory.height
             }
         })
 
-        await ComicStory.updateComicStories({ trx, stories: safeSavedComicStories, issueUuid, seriesUuid })
+        await updateMultipleComicStories(trx, safeSavedComicStories, issueUuid, seriesUuid)
         await trx.commit();
 
     } catch (e) {
@@ -47,13 +50,15 @@ async function getMultipleHeightAndWidths({ comicstories }){
     }
 }
 
-async function getHeightAndWidth(comicstory){
+async function getHeightAndWidth(comicstory?: ComicStory): Promise<ComicStory | undefined> {
+    if (!comicstory) { return undefined; }
+
     try{
         const { uuid, issueUuid, seriesUuid, storyImage } = comicstory;
 
-        const options = {
+        const options: AxiosRequestConfig = {
             method: 'GET',
-            url: getImageUrl({ image: storyImage, type: 'story' }),
+            url: getStoryImageUrl(comicstory),
             timeout: 1000 * 5,
             responseType: 'arraybuffer',
             maxContentLength: 10485760
@@ -61,7 +66,7 @@ async function getHeightAndWidth(comicstory){
 
         const response = await axios(options);
         const buffer = Buffer.from(response.data, 'binary');
-        const image = await sharp(buffer).metadata();
+        const image: Metadata = await sharp(buffer).metadata();
         const { width, height } = image;
         return { uuid, issueUuid, seriesUuid, width, height }
     } catch (e) {

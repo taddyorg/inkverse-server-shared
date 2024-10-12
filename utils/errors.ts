@@ -1,8 +1,8 @@
-const Sentry = require("@sentry/node");
+import * as Sentry from "@sentry/node";
 
 const testProductionCode = false;
 
-function setUpLogger(){
+export function setUpLogger(){
   try{
     Sentry.init({
       dsn: process.env.SENTRY_URL,
@@ -12,7 +12,7 @@ function setUpLogger(){
   }
 }
 
-function captureRemoteError(error){
+export function captureRemoteError(error: Error) {
   try{
     if (!(testProductionCode || process.env.NODE_ENV === 'production')){
       console.error('Error', error);
@@ -24,32 +24,23 @@ function captureRemoteError(error){
   }
 }
 
-function getSafeError({ error, errorType, safeErrorMessage }){  
+export function getSafeError(error: Error, errorType: string, safeErrorMessage: string) {  
   const safeError = testProductionCode || process.env.NODE_ENV === 'production' 
     ? new Error(safeErrorMessage)
     : error
-
-  safeError.errorType = errorType || 'unknown'
   
   captureRemoteError(error);
   console.log("Error from getSafeError", safeErrorMessage, error);
   return safeError
 }
 
-function errorResponder(error, req, res, next) {
-  switch(error.errorType){
-    case 'not-found':
-      res.status(404).send(error.message);
-      return;
-    default:
-      res.status(500).send(error.message);
-      return;
-  }
-}
-
-module.exports = {
-  setUpLogger,
-  captureRemoteError,
-  getSafeError,
-  errorResponder,
-}
+// export function errorResponder(error: Error, req: Request, res: Response, next: NextFunction) {
+//   switch(error.errorType){
+//     case 'not-found':
+//       res.status(404).send(error.message);
+//       return;
+//     default:
+//       res.status(500).send(error.message);
+//       return;
+//   }
+// }

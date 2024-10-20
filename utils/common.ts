@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import { isNumber } from 'lodash';
 
 const adminUserIdsSet = new Set(JSON.parse(process.env.ADMIN_USER_IDS || '[]'));
 

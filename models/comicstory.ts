@@ -1,5 +1,5 @@
 import type { Knex } from "knex";
-import { flatten } from "lodash";
+import { flatten } from "lodash-es";
 
 import { database, type ComicStoryModel } from "../database/index.js";
 

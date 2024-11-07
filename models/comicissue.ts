@@ -1,4 +1,4 @@
-import { get } from "lodash";
+import { get } from "lodash-es";
 
 import { database, type ComicIssueModel, type ComicStoryModel } from "../database/index.js";
 import { SortOrder, TaddyType } from "../graphql/types.js";

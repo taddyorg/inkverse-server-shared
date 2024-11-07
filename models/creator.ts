@@ -1,4 +1,4 @@
-import { get } from "lodash";
+import { get } from "lodash-es";
 
 import { database, type CreatorModel } from "../database/index.js";
 import { TaddyType } from "../graphql/types.js";

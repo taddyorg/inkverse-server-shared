@@ -1,4 +1,4 @@
-import { get } from "lodash";
+import { get } from "lodash-es";
 
 import { database, type ComicSeriesModel } from "../database/index.js";
 import { TaddyType } from "../graphql/types.js";
@@ -80,7 +80,7 @@ export class ComicSeries {
       .first();
   }
 
-  static async getByShortUrl(shortUrl: string): Promise<ComicSeriesModel | null> {
+  static async getComicSeriesByShortUrl(shortUrl: string): Promise<ComicSeriesModel | null> {
     return await database('comicseries')
       .where({ shortUrl })
       .first();

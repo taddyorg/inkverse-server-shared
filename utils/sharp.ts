@@ -2,7 +2,7 @@ import sharp, { type Metadata } from 'sharp';
 import axios, { type AxiosRequestConfig } from 'axios';
 import { Knex } from 'knex';
 
-import database from '../database/index.js';
+import { database } from '../database/index.js';
 import type { ComicStoryModel } from '../database/types.js';
 import { ComicStory } from '../models/index.js';
 

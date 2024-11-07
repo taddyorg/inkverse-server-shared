@@ -1,5 +1,4 @@
-import crypto from 'crypto';
-import { mapKeys, camelCase, isNumber } from 'lodash';
+import { camelCase, mapKeys } from 'lodash-es';
 
 const adminUserIdsSet = new Set(JSON.parse(process.env.ADMIN_USER_IDS || '[]'));
 const MAX_PG_INT = 2147483647;

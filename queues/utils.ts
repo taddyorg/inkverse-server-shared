@@ -1,6 +1,6 @@
 import { ListQueuesCommand, CreateQueueCommand, ReceiveMessageCommand, DeleteMessageCommand, DeleteMessageBatchCommand, SendMessageBatchCommand, SendMessageCommand, type SendMessageCommandOutput, type Message } from "@aws-sdk/client-sqs";
 import { sqsClient } from "./sqs-client.js";
-import uniqBy from "lodash/uniqBy.js";
+import { uniqBy } from "lodash-es";
 import { processWebhook } from "../taddy/process-webhook.js";
 
 export enum QUEUE_NAMES {

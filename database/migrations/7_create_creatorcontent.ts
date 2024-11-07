@@ -2,7 +2,8 @@ import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('creatorcontent', (table) => {
-    table.bigIncrements('id');
+    table.bigIncrements('id', { primaryKey: false });
+    table.uuid('uuid').primary();
     table.timestamp('created_at').notNullable().defaultTo(knex.raw('now()'));
     table.timestamp('updated_at');
     table.string('hash');

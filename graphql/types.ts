@@ -506,12 +506,12 @@ export type CreatorContent = {
   hash?: Maybe<Scalars['String']['output']>;
   /**  (Old) Unique identifier for this creatorcontent  */
   id?: Maybe<Scalars['ID']['output']>;
-  /**  Unique identifier for this creatorcontent  */
-  mergedUuid?: Maybe<Scalars['ID']['output']>;
   /**  Position on the creator feed  */
   position?: Maybe<Scalars['Int']['output']>;
   /**  Roles for the creator for this content  */
   roles?: Maybe<Array<Maybe<ContentRole>>>;
+  /**  Unique identifier for this creatorcontent  */
+  uuid?: Maybe<Scalars['ID']['output']>;
 };
 
 /**  Link Details  */
@@ -792,7 +792,7 @@ export type Query = {
   getComicStory?: Maybe<ComicStory>;
   /**  Get details on a Creator  */
   getCreator?: Maybe<Creator>;
-  /**  Get details on a Creator  */
+  /**  Get details on a Creator Content  */
   getCreatorContent?: Maybe<CreatorContent>;
   /**  Get efficient links for creators of content  */
   getCreatorLinksForSeries?: Maybe<Array<Maybe<CreatorLinkDetails>>>;
@@ -824,7 +824,8 @@ export type QueryGetCreatorArgs = {
 
 
 export type QueryGetCreatorContentArgs = {
-  mergedUuid?: InputMaybe<Scalars['ID']['input']>;
+  contentUuid?: InputMaybe<Scalars['ID']['input']>;
+  creatorUuid?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -1077,9 +1078,9 @@ export type CreatorContentResolvers<ContextType = any, ParentType extends Resolv
   creatorUuid?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   hash?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
-  mergedUuid?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   position?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   roles?: Resolver<Maybe<Array<Maybe<ResolversTypes['ContentRole']>>>, ParentType, ContextType>;
+  uuid?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 

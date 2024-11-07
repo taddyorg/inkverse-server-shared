@@ -100,6 +100,7 @@ export type CreatorModel = {
 
 export type CreatorContentModel = {
   id: number | null;
+  uuid: string;
   createdAt: Date;
   updatedAt: Date | null;
   hash: string | null;

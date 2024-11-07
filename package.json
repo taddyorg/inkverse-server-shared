@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.js",
     "prod": "node server.js",
+    "codegen": "graphql-codegen --config codegen.ts",
     "migrate": "tsx ./node_modules/.bin/knex --knexfile ./database/config.ts migrate:latest",
     "migrate:rollback": "tsx ./database/list-last-batch-migrations.ts",
     "migration-list": "tsx ./node_modules/.bin/knex --knexfile ./database/config.ts migrate:list"
@@ -15,30 +16,34 @@
   "author": "Inkverse",
   "license": "AGPL-3.0",
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.245.0",
-    "@aws-sdk/client-sesv2": "^3.245.0",
-    "@aws-sdk/client-sns": "^3.245.0",
-    "@aws-sdk/client-sqs": "^3.245.0",
-    "@aws-sdk/lib-storage": "^3.245.0",
-    "@aws-sdk/s3-request-presigner": "^3.245.0",
-    "@sentry/node": "^8.33.1",
+    "@aws-sdk/client-s3": "^3.686.0",
+    "@aws-sdk/client-sesv2": "^3.686.0",
+    "@aws-sdk/client-sns": "^3.686.0",
+    "@aws-sdk/client-sqs": "^3.686.0",
+    "@aws-sdk/lib-storage": "^3.686.0",
+    "@aws-sdk/s3-request-presigner": "^3.686.0",
+    "@sentry/node": "^8.37.1",
     "axios": "^1.7.7",
-    "firebase-admin": "^12.6.0",
+    "firebase-admin": "^12.7.0",
     "graphql": "^16.9.0",
-    "graphql-request": "^7.1.0",
+    "graphql-request": "^7.1.2",
     "he": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "knex": "^3.1.0",
-    "knex-stringcase": "^1.4.6",
+    "knex-stringcase": "^1.5.5",
     "lodash": "^4.17.21",
     "moment": "^2.30.1",
-    "pg": "^8.13.0",
+    "pg": "^8.13.1",
     "qs": "^6.13.0",
     "redis": "^4.7.0",
     "sharp": "^0.33.5",
-    "uuid": "^10.0.0"
+    "uuid": "^11.0.2"
   },
   "devDependencies": {
-    "tsx": "^3.12.7"
+    "@graphql-codegen/cli": "5.0.3",
+    "@graphql-codegen/introspection": "4.0.3",
+    "@graphql-codegen/typescript": "4.1.1",
+    "@graphql-codegen/typescript-resolvers": "4.4.0",
+    "tsx": "^4.19.2"
   }
 }

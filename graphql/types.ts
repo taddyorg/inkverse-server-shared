@@ -97,11 +97,13 @@ export type ComicSeries = {
   issuesHash?: Maybe<Scalars['String']['output']>;
   /**  The language the comic series is in  */
   language?: Maybe<Language>;
+  /**  Layout type of the comic series  */
+  layoutType?: Maybe<ComicSeriesLayoutType>;
   /**  The name (title) for a comic series  */
   name?: Maybe<Scalars['String']['output']>;
   /**  The scopes for the exclusive content - e.g. 'patreon'  */
   scopesForExclusiveContent?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
-  /**  Layout type of the comic series  */
+  /**  Type of the comic series  */
   seriesType?: Maybe<ComicSeriesType>;
   /**  The unique url ending for a comic series  */
   shortUrl?: Maybe<Scalars['String']['output']>;
@@ -129,7 +131,12 @@ export type ComicSeriesIssuesArgs = {
   sortOrder?: InputMaybe<SortOrder>;
 };
 
-/**  Type of comic series (just webtoon for now)  */
+/**  Layout types for comic series  */
+export enum ComicSeriesLayoutType {
+  VerticalScrollTopToBottom = 'VERTICAL_SCROLL_TOP_TO_BOTTOM'
+}
+
+/**  Type of comic series  */
 export enum ComicSeriesType {
   Webtoon = 'WEBTOON'
 }
@@ -934,6 +941,7 @@ export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ComicIssue: ResolverTypeWrapper<ComicIssueModel>;
   ComicSeries: ResolverTypeWrapper<ComicSeriesModel>;
+  ComicSeriesLayoutType: ComicSeriesLayoutType;
   ComicSeriesType: ComicSeriesType;
   ComicStory: ResolverTypeWrapper<ComicStoryModel>;
   ContentRating: ContentRating;
@@ -1012,6 +1020,7 @@ export type ComicSeriesResolvers<ContextType = any, ParentType extends Resolvers
   issues?: Resolver<Maybe<Array<Maybe<ResolversTypes['ComicIssue']>>>, ParentType, ContextType, Partial<ComicSeriesIssuesArgs>>;
   issuesHash?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   language?: Resolver<Maybe<ResolversTypes['Language']>, ParentType, ContextType>;
+  layoutType?: Resolver<Maybe<ResolversTypes['ComicSeriesLayoutType']>, ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   scopesForExclusiveContent?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   seriesType?: Resolver<Maybe<ResolversTypes['ComicSeriesType']>, ParentType, ContextType>;

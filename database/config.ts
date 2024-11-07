@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import knexStringcase from 'knex-stringcase';
 
 // Get the directory name of the current module
 const __filename = fileURLToPath(import.meta.url);
@@ -9,7 +10,7 @@ const envPath = path.resolve(__dirname, '..', '..', '..', '.env');
 
 dotenv.config({ path: envPath });
 
-const connectionString = process.env.DATABASE_URL || `postgres://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_ENDPOINT}:5432/${process.env.DATABASE_NAME}`;
+const connectionString = process.env.DATABASE_URL || `postgres://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_ENDPOINT}:5434/${process.env.DATABASE_NAME}`;
 
 // Define the type and create the configuration object in one go
 const config = {
@@ -26,6 +27,7 @@ const config = {
     directory: path.resolve(__dirname, 'migrations'),
     tableName: 'migrations',
   },
+  ...knexStringcase,
 } as const;
 
 export default config;

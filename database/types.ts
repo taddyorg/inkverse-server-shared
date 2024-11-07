@@ -1,111 +1,120 @@
-import type { UUID } from "crypto";
+import type { 
+  ComicSeriesLayoutType, 
+  ComicSeriesType, 
+  ContentRating, 
+  Genre, 
+  Language, 
+  SeriesStatus,
+  TaddyType
+} from "../graphql/types.js";
 
 export type ComicSeriesModel = {
-  id?: number;
-  uuid: UUID;
+  id: number | null;
+  uuid: string;
   createdAt: Date;
-  updatedAt?: Date;
-  source?: string;
+  updatedAt: Date | null;
   sssUrl: string;
-  sssOwnerName?: string;
-  sssOwnerPublicEmail?: string;
-  hash?: string;
-  websubHash?: string;
-  issuesHash?: string;
-  creatorsHash?: string;
-  datePublished?: number;
-  name?: string;
-  description?: string;
-  coverImage?: Record<string, string>;
-  bannerImage?: Record<string, string>;
-  thumbnailImage?: Record<string, string>;
-  seriesType?: string;
-  language?: string;
-  contentRating?: string;
-  genre0?: string;
-  genre1?: string;
-  genre2?: string;
-  tags?: string[];
+  sssOwnerName: string | null;
+  sssOwnerPublicEmail: string | null;
+  hash: string | null;
+  issuesHash: string | null;
+  datePublished: number | null;
+  name: string | null;
+  description: string | null;
+  coverImage: Record<string, string> | null;
+  bannerImage: Record<string, string> | null;
+  thumbnailImage: Record<string, string> | null;
+  seriesType: ComicSeriesType | null;
+  language: Language | null;
+  contentRating: ContentRating | null;
+  genre0: Genre | null;
+  genre1: Genre | null;
+  genre2: Genre | null;
+  tags: string[] | null;
   shortUrl: string;
-  copyright?: string;
-  isCompleted?: boolean;
-  isBlocked?: boolean;
-  status?: string;
-  seriesLayout?: string;
-  hostingProviderUuid?: UUID;
-  scopesForExclusiveContent?: string[];
+  copyright: string | null;
+  isBlocked: boolean | null;
+  status: SeriesStatus | null;
+  seriesLayout: ComicSeriesLayoutType | null;
+  hostingProviderUuid: string | null;
+  scopesForExclusiveContent: string[] | null;
 }
 
 export type ComicIssueModel = {
-  id?: number;
-  uuid: UUID;
-  seriesUuid: UUID;
+  id: number | null;
+  uuid: string;
+  seriesUuid: string;
   createdAt: Date;
-  updatedAt?: Date;
-  hash?: string;
-  storiesHash?: string;
-  datePublished?: number;
-  name?: string;
-  creatorNote?: string;
-  bannerImage?: Record<string, string>;
-  thumbnailImage?: Record<string, string>;
-  isRemoved?: boolean;
-  isBlocked?: boolean;
-  position?: number;
-  pushNotificationMessage?: string;
-  scopesForExclusiveContent?: string[];
-  dateExclusiveContentIsAvailable?: Date;
+  updatedAt: Date | null;
+  hash: string | null;
+  storiesHash: string | null;
+  datePublished: number | null;
+  name: string | null;
+  creatorNote: string | null;
+  bannerImage: Record<string, string> | null;
+  thumbnailImage: Record<string, string> | null;
+  isRemoved: boolean | null;
+  isBlocked: boolean | null;
+  position: number | null;
+  pushNotificationMessage: string | null;
+  scopesForExclusiveContent: string[] | null;
+  dateExclusiveContentIsAvailable: number | null;
 }
 
 export type ComicStoryModel = {
-  id?: number;
-  uuid: UUID;
-  createdAt?: Date;
-  updatedAt?: Date;
-  hash?: string;
-  seriesUuid: UUID;
-  issueUuid: UUID;
-  position?: number;
-  width?: number;
-  height?: number;
-  storyImage?: Record<string, string>;
-  isRemoved?: boolean;
+  id: number | null;
+  uuid: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+  hash: string | null;
+  seriesUuid: string;
+  issueUuid: string;
+  position: number | null;
+  width: number | null;
+  height: number | null;
+  storyImage: Record<string, string> | null;
+  isRemoved: boolean | null;
 }
 
 export type CreatorModel = {
-  id?: number;
-  uuid: UUID;
-  createdAt?: Date;
-  updatedAt?: Date;
-  hash?: string;
-  name?: string;
-  description?: string;
-  avatarImage?: Record<string, string>;
-  source?: string;
-  contentHash?: string;
-  websubHash?: string;
-  datePublished?: number;
-  bio?: string;
-  country?: string;
-  links?: any[];
-  tags?: string[];
+  id: number | null;
+  uuid: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+  hash: string | null;
+  name: string | null;
+  bio: string | null;
+  avatarImage: Record<string, string> | null;
+  contentHash: string | null;
+  datePublished: number | null;
+  country: string | null;
+  links: Record<string, string>[] | null;
+  tags: string[] | null;
   shortUrl: string;
-  copyright?: string;
-  sssUrl?: string;
-  sssOwnerName?: string;
-  sssOwnerPublicEmail?: string;
-  isBlocked?: boolean;
+  copyright: string | null;
+  sssUrl: string | null;
+  sssOwnerName: string | null;
+  sssOwnerPublicEmail: string | null;
+  isBlocked: boolean | null;
 }
 
 export type CreatorContentModel = {
-  id?: number;
+  id: number | null;
   createdAt: Date;
-  updatedAt?: Date;
-  hash?: string;
-  contentUuid: UUID;
-  contentType: string;
-  creatorUuid: UUID;
-  roles?: string[];
-  position?: number;
-  contentPosition?: number;
+  updatedAt: Date | null;
+  hash: string | null;
+  contentUuid: string;
+  contentType: TaddyType;
+  creatorUuid: string;
+  roles: string[] | null;
+  position: number | null;
+  contentPosition: number | null;
+}
+
+export type UUIDLookupModel = {
+  id: number;
+  uuid: string;
+  taddyType: TaddyType;
+  createdAt: Date;
+  updatedAt: Date | null;
 }

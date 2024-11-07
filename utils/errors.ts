@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/node";
 
-const testProductionCode = false;
+const testProductionErrorHandling = false;
 
 export function setUpLogger(){
   try{
@@ -8,39 +8,34 @@ export function setUpLogger(){
       dsn: process.env.SENTRY_URL,
     });
   }catch(e){
-    console.log('error in Sentry setUpLogger', e);
+    console.error('error in Sentry setUpLogger', e);
   }
 }
 
-export function captureRemoteError(error: Error) {
+export function captureRemoteError(error: Error, safeErrorMessage?: string) {
   try{
-    if (!(testProductionCode || process.env.NODE_ENV === 'production')){
-      console.error('Error', error);
-    }
-    
+    // Capture the error in Sentry
     Sentry.captureException(error);
+
+    // Log the error for debugging
+    console.error("Error from captureRemoteError", safeErrorMessage, error);
   }catch(e){
-    console.log('error in Sentry captureRemoteError', e);
+    console.error('error in Sentry captureRemoteError', e);
   }
 }
 
-export function getSafeError(error: Error, errorType: string, safeErrorMessage: string) {  
-  const safeError = testProductionCode || process.env.NODE_ENV === 'production' 
+// Logs the error in Sentry and returns a safe error message for the client
+export function getSafeError(untypedError: any, safeErrorMessage: string) {  
+  const errorInstance = untypedError instanceof Error 
+    ? untypedError 
+    : new Error(String(untypedError) ?? 'Unknown error');
+
+  const safeError = testProductionErrorHandling || process.env.NODE_ENV === 'production' 
     ? new Error(safeErrorMessage)
-    : error
+    : errorInstance
   
-  captureRemoteError(error);
-  console.log("Error from getSafeError", safeErrorMessage, error);
+  // Capture + log the error
+  captureRemoteError(errorInstance, safeErrorMessage);
+
   return safeError
 }
-
-// export function errorResponder(error: Error, req: Request, res: Response, next: NextFunction) {
-//   switch(error.errorType){
-//     case 'not-found':
-//       res.status(404).send(error.message);
-//       return;
-//     default:
-//       res.status(500).send(error.message);
-//       return;
-//   }
-// }

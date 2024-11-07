@@ -4,7 +4,6 @@ export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable('creator', (table) => {
     table.bigIncrements('id', { primaryKey: false });
     table.uuid('uuid').primary();
-    table.string('source');
     table.timestamp('created_at').notNullable().defaultTo(knex.raw('now()'));
     table.timestamp('updated_at');
     table.string('hash').unique();

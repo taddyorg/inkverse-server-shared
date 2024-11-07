@@ -6,14 +6,11 @@ export async function up(knex: Knex): Promise<void> {
     table.uuid('uuid').primary();
     table.timestamp('created_at').notNullable().defaultTo(knex.raw('now()'));
     table.timestamp('updated_at');
-    table.string('source');
     table.text('sss_url').unique();
     table.string('sss_owner_name');
     table.text('sss_owner_public_email');
     table.string('hash').unique();
-    table.string('websub_hash');
     table.string('issues_hash');
-    table.string('creators_hash');
     table.bigInteger('date_published');
     table.string('name');
     table.text('description');
@@ -29,7 +26,6 @@ export async function up(knex: Knex): Promise<void> {
     table.specificType('tags', 'varchar(255)[]');
     table.string('short_url').notNullable().unique();
     table.text('copyright');
-    table.boolean('is_completed');
     table.boolean('is_blocked');
     table.string('status');
     table.string('series_layout');

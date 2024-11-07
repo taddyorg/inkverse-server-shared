@@ -51,21 +51,19 @@ export class CreatorContent {
       .first();
   }
 
-  // static async getCreatorContent(
-  //   creatorUuid: string,
-  //   contentUuid: string,
-  //   sortOrder: SortOrder | undefined = SortOrder.Latest,
-  //   offset: number | undefined = 0,
-  //   limit: number | undefined = 10
-  // ): Promise<CreatorContentModel[]> {
-  //   return await database('creatorcontent')
-  //     .where({
-  //       creatorUuid,
-  //       contentUuid,
-  //     })
-  //     .orderByRaw('position ' + sortOrderToSQLOrderBy(sortOrder) + ' NULLS LAST')
-  //     .offset(offset)
-  //     .limit(limit)
-  //     .returning('*');
-  // }
+  static async getContentForCreator(
+    creatorUuid: string,
+    sortOrder: SortOrder | undefined = SortOrder.Latest,
+    offset: number | undefined = 0,
+    limit: number | undefined = 10
+  ): Promise<CreatorContentModel[]> {
+    return await database('creatorcontent')
+      .where({
+        creatorUuid,
+      })
+      .orderByRaw('position ' + sortOrderToSQLOrderBy(sortOrder) + ' NULLS LAST')
+      .offset(offset)
+      .limit(limit)
+      .returning('*');
+  }
 }

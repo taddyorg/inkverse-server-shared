@@ -80,7 +80,7 @@ export class Creator {
     }
   }
 
-  static async addCreator(data: Record<string, any>){    
+  static async addCreator(data: Record<string, any>): Promise<CreatorModel | null> {    
     const { uuid, name } = data;
     var trx = await database.transaction();
     try {
@@ -105,7 +105,7 @@ export class Creator {
     }
   }
 
-  static async updateCreator(data: Record<string, any>){    
+  static async updateCreator(data: Record<string, any>): Promise<CreatorModel | null> {    
     const { uuid, name } = data;
     var trx = await database.transaction();
     try {
@@ -130,7 +130,7 @@ export class Creator {
     }
   }
 
-  static async deleteCreator(data: Record<string, any>){
+  static async deleteCreator(data: Record<string, any>): Promise<{ uuid: string, contentUuids: string[], shortUrl: string } | null> {
     const { uuid } = data;
     var trx = await database.transaction();
 
@@ -153,7 +153,8 @@ export class Creator {
       await trx.commit();
       
       return {
-        uuids: [ uuid, allContentUUids ],
+        uuid,
+        contentUuids: allContentUUids,
         shortUrl: deletedCreator.shortUrl
       };
     }

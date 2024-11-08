@@ -164,6 +164,7 @@ const GET_CREATOR_WITH_CONTENT = gql`
 const GET_CREATORCONTENT = gql`
   query GetCreatorContent($uuid: ID) {
     getCreatorContent(uuid: $uuid) {
+      uuid
       hash
       creatorUuid
       contentUuid

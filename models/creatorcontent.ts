@@ -67,7 +67,7 @@ export class CreatorContent {
       .returning('*');
   }
 
-  static async addOrUpdateCreatorContent(data: Record<string, any>) {
+  static async addOrUpdateCreatorContent(data: Record<string, any>): Promise<CreatorContentModel | null> {
     const creatorcontentdata = getCreatorContentDetails(data);
     const [creatorcontent] = await database("creatorcontent")
       .insert(creatorcontentdata)
@@ -81,7 +81,7 @@ export class CreatorContent {
     return creatorcontent; 
   }
 
-  static async deleteCreatorContent(data: Record<string, any>) {
+  static async deleteCreatorContent(data: Record<string, any>): Promise<CreatorContentModel | null> {
     const { uuid } = data;
 
     const [deletedCreatorContent] = await database('creatorcontent')

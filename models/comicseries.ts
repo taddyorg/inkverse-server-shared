@@ -166,7 +166,7 @@ export class ComicSeries {
     }
   }
 
-  static async deleteComicSeries(data: Record<string, any>): Promise<{ uuids: string[], shortUrl: string } | null> {
+  static async deleteComicSeries(data: Record<string, any>): Promise<{ uuid: string, issueUuids: string[], storyUuids: string[], shortUrl: string } | null> {
     const { uuid } = data;
     var trx = await database.transaction();
 
@@ -195,7 +195,9 @@ export class ComicSeries {
       await trx.commit();
 
       return {
-        uuids: [uuid, allIssuesUUids, allStoriesUUids],
+        uuid,
+        issueUuids: allIssuesUUids,
+        storyUuids: allStoriesUUids,
         shortUrl: deletedComicSeries.shortUrl
       };
     }

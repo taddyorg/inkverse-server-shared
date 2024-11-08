@@ -226,7 +226,7 @@ export class ComicIssue {
     }
   }
 
-  static async deleteComicIssue(data: Record<string, any>): Promise<{ uuids: string[], seriesUuid: string }> {
+  static async deleteComicIssue(data: Record<string, any>): Promise<{ uuid: string, storyUuids: string[], seriesUuid: string }> {
     const { uuid } = data;
     var trx = await database.transaction();
 
@@ -248,7 +248,8 @@ export class ComicIssue {
       await trx.commit();
 
       return {
-        uuids: [uuid, allStoriesUUids],
+        uuid,
+        storyUuids: allStoriesUUids,
         seriesUuid: deletedComicIssue.seriesUuid,
       };
     }

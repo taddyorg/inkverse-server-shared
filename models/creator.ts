@@ -3,9 +3,10 @@ import { get } from "lodash-es";
 import { database, type CreatorModel } from "../database/index.js";
 import { TaddyType } from "../graphql/types.js";
 
-import { safeStringValue, safeArrayProperties, safeObjWithVariantKeys, convertTextToBoolean } from "../utils/common.js";
+import { safeStringValue, safeArrayProperties, safeObjWithVariantKeys, convertTextToBoolean, prettyEncodeTitle } from "../utils/common.js";
 import { safeCountry } from "../../public/country.js";
 import { safeLinkType } from "../../public/links.js";
+import { UUIDLookup } from "./index.js";
 
 type CreatorInput = Omit<CreatorModel, 'id' | 'uuid' | 'createdAt' | 'updatedAt'>;
 
@@ -59,6 +60,108 @@ export class Creator {
     return await database('creator')
       .where({ shortUrl })
       .first();
+  }
+
+  static async getShortUrl(uuid: string, name: string): Promise<string> {
+    const savedcreator = await Creator.getCreatorByUuid(uuid);
+    if (savedcreator && savedcreator.shortUrl) {
+      return savedcreator.shortUrl
+    }else{
+      if (!name) { throw new Error('creator - getShortUrl - name is required')};
+      const nameLowercase = name.toLowerCase();
+      const shortUrl = prettyEncodeTitle(nameLowercase);
+      const formattedShortUrl = `^${shortUrl}($|[0-9]+)`
+      const creators = await database('creator')
+        .whereRaw("short_url ~ ? AND (short_url !~ '[0-9]$' OR short_url ~ '[0-9]+$')", [formattedShortUrl])
+        .returning("*");
+      return creators.length > 0 
+        ? `${shortUrl}-${creators.length}` 
+        : shortUrl;
+    }
+  }
+
+  static async addCreator(data: Record<string, any>){    
+    const { uuid, name } = data;
+    var trx = await database.transaction();
+    try {
+      const shortUrl = await Creator.getShortUrl(uuid, name);
+      await UUIDLookup.saveUUIDforType(trx, uuid, TaddyType.Creator);
+      const [ creator ] = await database("creator")
+        .transacting(trx)
+        .insert({
+          uuid,
+          ...getCreatorDetails(data, shortUrl)
+        })
+        .returning("*");
+      
+      await trx.commit();
+      
+      return creator;
+    }
+    catch (e) {
+      console.log('addCreator transaction rollback', uuid, e);
+      await trx.rollback();
+      throw e;
+    }
+  }
+
+  static async updateCreator(data: Record<string, any>){    
+    const { uuid, name } = data;
+    var trx = await database.transaction();
+    try {
+      const shortUrl = await Creator.getShortUrl(uuid, name);
+      const [ creator ] = await database("creator")
+        .transacting(trx)
+        .where({ uuid })
+        .update({
+          updatedAt: new Date(),
+          ...getCreatorDetails(data, shortUrl)
+        })
+        .returning("*");
+      
+      await trx.commit();
+      
+      return creator;
+    }
+    catch (e) {
+      console.log('updateCreator transaction rollback', uuid, e);
+      await trx.rollback();
+      throw e;
+    }
+  }
+
+  static async deleteCreator(data: Record<string, any>){
+    const { uuid } = data;
+    var trx = await database.transaction();
+
+    try {      
+      const [ deletedCreator ] = await database('creator')
+        .transacting(trx)
+        .where({ uuid })
+        .delete('*');
+
+      const deletedCreatorContent = await database('creatorcontent')
+        .transacting(trx)
+        .where({ creatorUuid: uuid })
+        .delete('*');
+
+      const allContentUUids = deletedCreatorContent.map(creatorcontent => creatorcontent.uuid);
+      const allUuids = [ uuid, ...allContentUUids ];
+
+      await UUIDLookup.deleteLookupsForUuids(trx, allUuids);
+
+      await trx.commit();
+      
+      return {
+        uuids: [ uuid, allContentUUids ],
+        shortUrl: deletedCreator.shortUrl
+      };
+    }
+    catch (e) {
+      console.log('deleteCreator transaction rollback', uuid, e);
+      await trx.rollback();
+      throw e;
+    }
   }
 
   static async getCreatorsForContent(contentUuid: string, contentType: TaddyType): Promise<CreatorModel[]> {

@@ -66,4 +66,28 @@ export class CreatorContent {
       .limit(limit)
       .returning('*');
   }
+
+  static async addOrUpdateCreatorContent(data: Record<string, any>) {
+    const creatorcontentdata = getCreatorContentDetails(data);
+    const [creatorcontent] = await database("creatorcontent")
+      .insert(creatorcontentdata)
+      .onConflict(['creatorUuid', 'contentUuid', 'contentType'])
+      .merge({
+        updatedAt: new Date(),
+        ...creatorcontentdata
+      })
+      .returning("*");
+
+    return creatorcontent; 
+  }
+
+  static async deleteCreatorContent(data: Record<string, any>) {
+    const { uuid } = data;
+
+    const [deletedCreatorContent] = await database('creatorcontent')
+      .where({ uuid })
+      .delete('*');
+
+    return deletedCreatorContent;
+  }
 }

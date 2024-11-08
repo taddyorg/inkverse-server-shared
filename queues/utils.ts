@@ -1,7 +1,7 @@
 import { ListQueuesCommand, CreateQueueCommand, ReceiveMessageCommand, DeleteMessageCommand, DeleteMessageBatchCommand, SendMessageBatchCommand, SendMessageCommand, type SendMessageCommandOutput, type Message } from "@aws-sdk/client-sqs";
 import { sqsClient } from "./sqs-client.js";
 import { uniqBy } from "lodash-es";
-import { processWebhook } from "../taddy/process-webhook.js";
+import { processWebhook, TADDY_WEBHOOK_TYPE, TADDY_WEBHOOK_ACTION, type TaddyWebhook } from "../taddy/process-webhook.js";
 
 export enum QUEUE_NAMES {
   INKVERSE_HIGH_PRIORITY = "INKVERSE_HIGH_PRIORITY",
@@ -49,8 +49,7 @@ async function doWork(queueName: QUEUE_NAMES, doc: any, inputArgs?: any, isDebug
     case QUEUE_NAMES.INKVERSE_HIGH_PRIORITY:
       switch (doc.type) {
         case HIGH_PRIORITY_ACTION_TYPES.PROCESS_TADDY_WEBHOOK:
-          const { source, taddyType, action, data } = doc.data;
-          await processWebhook({ source, taddyType, action, data })
+          await processWebhook(doc.data as TaddyWebhook);
           return;
         default:
           throw new Error(`INKVERSE_HIGH_PRIORITY ERROR - Unhandled QUEUE_ACTION_TYPES case: ${doc.type}`);

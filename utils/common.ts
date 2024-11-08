@@ -4,7 +4,7 @@ const adminUserIdsSet = new Set(JSON.parse(process.env.ADMIN_USER_IDS || '[]'));
 const MAX_PG_INT = 2147483647;
 
 const inkverseApiUrl = process.env.NODE_ENV === 'production' 
-	? 'https://inkverse.co'
+	? 'https://api-v1.inkverse.co'
 	: 'http://inkverse.test:3000';
 
 function removeHttpFromUrl(url: string) {

@@ -864,7 +864,8 @@ export enum SortOrder {
 export enum TaddyType {
   Comicissue = 'COMICISSUE',
   Comicseries = 'COMICSERIES',
-  Creator = 'CREATOR'
+  Creator = 'CREATOR',
+  Creatorcontent = 'CREATORCONTENT'
 }
 
 export type WithIndex<TObject> = TObject & Record<string, any>;

@@ -525,6 +525,15 @@ export type CreatorLinkDetails = {
   url?: Maybe<Scalars['String']['output']>;
 };
 
+/**  Documentation marketing pages for bam  */
+export type Documentation = {
+  __typename?: 'Documentation';
+  /**  The id corresponding to an equivalent notion page  */
+  id?: Maybe<Scalars['ID']['output']>;
+  /**  All the text in the document  */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
 /**  Genres for different media types. Follows format: TYPE_GENRE_SUBGENRE  */
 export enum Genre {
   ComicseriesAction = 'COMICSERIES_ACTION',
@@ -796,6 +805,8 @@ export type Query = {
   getCreatorContent?: Maybe<CreatorContent>;
   /**  Get efficient links for creators of content  */
   getCreatorLinksForSeries?: Maybe<Array<Maybe<CreatorLinkDetails>>>;
+  /**  Get documentation  */
+  getDocumentation?: Maybe<Documentation>;
   /**  Get multiple issues for a comic series  */
   getIssuesForComicSeries: Array<Maybe<ComicIssue>>;
 };
@@ -832,6 +843,11 @@ export type QueryGetCreatorContentArgs = {
 export type QueryGetCreatorLinksForSeriesArgs = {
   contentType: TaddyType;
   contentUuid: Scalars['ID']['input'];
+};
+
+
+export type QueryGetDocumentationArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -952,6 +968,7 @@ export type ResolversTypes = ResolversObject<{
   Creator: ResolverTypeWrapper<CreatorModel>;
   CreatorContent: ResolverTypeWrapper<CreatorContentModel>;
   CreatorLinkDetails: ResolverTypeWrapper<CreatorLinkDetails>;
+  Documentation: ResolverTypeWrapper<Documentation>;
   Genre: Genre;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -974,6 +991,7 @@ export type ResolversParentTypes = ResolversObject<{
   Creator: CreatorModel;
   CreatorContent: CreatorContentModel;
   CreatorLinkDetails: CreatorLinkDetails;
+  Documentation: Documentation;
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   LinkDetails: LinkDetails;
@@ -1092,6 +1110,12 @@ export type CreatorLinkDetailsResolvers<ContextType = any, ParentType extends Re
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type DocumentationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Documentation'] = ResolversParentTypes['Documentation']> = ResolversObject<{
+  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  text?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type LinkDetailsResolvers<ContextType = any, ParentType extends ResolversParentTypes['LinkDetails'] = ResolversParentTypes['LinkDetails']> = ResolversObject<{
   type?: Resolver<Maybe<ResolversTypes['LinkType']>, ParentType, ContextType>;
   url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -1105,6 +1129,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getCreator?: Resolver<Maybe<ResolversTypes['Creator']>, ParentType, ContextType, Partial<QueryGetCreatorArgs>>;
   getCreatorContent?: Resolver<Maybe<ResolversTypes['CreatorContent']>, ParentType, ContextType, Partial<QueryGetCreatorContentArgs>>;
   getCreatorLinksForSeries?: Resolver<Maybe<Array<Maybe<ResolversTypes['CreatorLinkDetails']>>>, ParentType, ContextType, RequireFields<QueryGetCreatorLinksForSeriesArgs, 'contentType' | 'contentUuid'>>;
+  getDocumentation?: Resolver<Maybe<ResolversTypes['Documentation']>, ParentType, ContextType, RequireFields<QueryGetDocumentationArgs, 'id'>>;
   getIssuesForComicSeries?: Resolver<Array<Maybe<ResolversTypes['ComicIssue']>>, ParentType, ContextType, RequireFields<QueryGetIssuesForComicSeriesArgs, 'limitPerPage' | 'page' | 'seriesUuid'>>;
 }>;
 
@@ -1115,6 +1140,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   Creator?: CreatorResolvers<ContextType>;
   CreatorContent?: CreatorContentResolvers<ContextType>;
   CreatorLinkDetails?: CreatorLinkDetailsResolvers<ContextType>;
+  Documentation?: DocumentationResolvers<ContextType>;
   LinkDetails?: LinkDetailsResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 }>;

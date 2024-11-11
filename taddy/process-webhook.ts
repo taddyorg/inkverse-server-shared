@@ -3,44 +3,46 @@ import { CacheType, purgeCacheOnCdn, purgeMultipleOnCdn } from '../cache/index.j
 import { getMultipleHeightAndWidths } from '../utils/sharp.js';
 
 export type TaddyWebhook = {
-  taddyType: TADDY_WEBHOOK_TYPE;
-  action: TADDY_WEBHOOK_ACTION;
+  uuid: string;
+  timestamp: number;
+  taddyType: TaddyWebhookType;
+  action: TaddyWebhookAction;
   data: Record<string, any>;
 }
 
-export enum TADDY_WEBHOOK_TYPE {
+export enum TaddyWebhookType {
   COMICSERIES = "comicseries",
   COMICISSUE = "comicissue",
   CREATOR = "creator",
   CREATORCONTENT = "creatorcontent",
 }
 
-export enum TADDY_WEBHOOK_ACTION {
+export enum TaddyWebhookAction {
   CREATED = "created",
   UPDATED = "updated",
   DELETED = "deleted",
 }
 
-export async function processWebhook(body: TaddyWebhook) {
+export async function processWebhook(body: TaddyWebhook): Promise<void> {
   const { taddyType } = body;
   switch (taddyType) {
-    case TADDY_WEBHOOK_TYPE.COMICSERIES:
+    case TaddyWebhookType.COMICSERIES:
       return await processComicSeriesWebhook(body);
-    case TADDY_WEBHOOK_TYPE.COMICISSUE:
+    case TaddyWebhookType.COMICISSUE:
       return await processComicIssueWebhook(body);
-    case TADDY_WEBHOOK_TYPE.CREATOR:
+    case TaddyWebhookType.CREATOR:
       return await processCreatorWebhook(body);
-    case TADDY_WEBHOOK_TYPE.CREATORCONTENT:
+    case TaddyWebhookType.CREATORCONTENT:
       return await processCreatorContentWebhook(body);
     default:
       throw new Error(`processWebhook - Invalid taddyType: ${taddyType}`);
   }
 }
 
-async function processComicSeriesWebhook(body: TaddyWebhook) {
+async function processComicSeriesWebhook(body: TaddyWebhook): Promise<void> {
   const { taddyType, action, data } = body;
   switch (action) {
-    case TADDY_WEBHOOK_ACTION.CREATED: {
+    case TaddyWebhookAction.CREATED: {
       const comicseries = await ComicSeries.addComicSeries(data);
 
       if (!comicseries) {
@@ -53,7 +55,7 @@ async function processComicSeriesWebhook(body: TaddyWebhook) {
       ])
       return;
     }
-    case TADDY_WEBHOOK_ACTION.UPDATED: {
+    case TaddyWebhookAction.UPDATED: {
       const comicseries = await ComicSeries.updateComicSeries(data);  
 
       if (!comicseries) {
@@ -64,7 +66,7 @@ async function processComicSeriesWebhook(body: TaddyWebhook) {
 
       return;
     }
-    case TADDY_WEBHOOK_ACTION.DELETED: {
+    case TaddyWebhookAction.DELETED: {
       const deletedComicSeries = await ComicSeries.deleteComicSeries(data);
 
       if (!deletedComicSeries) {
@@ -89,7 +91,7 @@ async function processComicSeriesWebhook(body: TaddyWebhook) {
 async function processComicIssueWebhook(body: TaddyWebhook) {
   const { taddyType, action, data } = body;
   switch (action) {
-    case TADDY_WEBHOOK_ACTION.CREATED: {
+    case TaddyWebhookAction.CREATED: {
       const [comicissue, comicstories] = await ComicIssue.addComicIssue(data);
 
       if (!comicissue) {
@@ -122,7 +124,7 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
 
       return;
     }
-    case TADDY_WEBHOOK_ACTION.UPDATED: {
+    case TaddyWebhookAction.UPDATED: {
       const [comicissue, comicstories] = await ComicIssue.updateComicIssue(data);
       
       if (!comicissue) {
@@ -150,7 +152,7 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
 
       return;
     }
-    case TADDY_WEBHOOK_ACTION.DELETED: {
+    case TaddyWebhookAction.DELETED: {
       const deletedComicIssue = await ComicIssue.deleteComicIssue(data);
 
       if (!deletedComicIssue) {
@@ -177,10 +179,10 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
   }
 }
 
-async function processCreatorWebhook(body: TaddyWebhook) {
+async function processCreatorWebhook(body: TaddyWebhook): Promise<void> {
   const { taddyType, action, data } = body;
   switch (action) {
-    case TADDY_WEBHOOK_ACTION.CREATED: {
+    case TaddyWebhookAction.CREATED: {
       const creator = await Creator.addCreator(data);
 
       if (!creator) {
@@ -190,7 +192,7 @@ async function processCreatorWebhook(body: TaddyWebhook) {
       await purgeCacheOnCdn(CacheType.CREATOR, creator.uuid)
       return;
     }
-    case TADDY_WEBHOOK_ACTION.UPDATED: {
+    case TaddyWebhookAction.UPDATED: {
       const creator = await Creator.updateCreator(data);
 
       if (!creator) {
@@ -200,7 +202,7 @@ async function processCreatorWebhook(body: TaddyWebhook) {
       await purgeCacheOnCdn(CacheType.CREATOR, creator.uuid)
       return;
     }
-    case TADDY_WEBHOOK_ACTION.DELETED: {
+    case TaddyWebhookAction.DELETED: {
       const deletedCreator = await Creator.deleteCreator(data);
 
       if (!deletedCreator) {
@@ -220,10 +222,10 @@ async function processCreatorWebhook(body: TaddyWebhook) {
   }
 }
 
-async function processCreatorContentWebhook(body: TaddyWebhook) {
+async function processCreatorContentWebhook(body: TaddyWebhook): Promise<void> {
   const { taddyType, action, data } = body;
   switch (action) {
-    case TADDY_WEBHOOK_ACTION.CREATED: {
+    case TaddyWebhookAction.CREATED: {
       const creatorcontent = await CreatorContent.addOrUpdateCreatorContent(data);
 
       if (!creatorcontent) {
@@ -246,7 +248,7 @@ async function processCreatorContentWebhook(body: TaddyWebhook) {
 
       return;
     }
-    case TADDY_WEBHOOK_ACTION.UPDATED: {
+    case TaddyWebhookAction.UPDATED: {
       const creatorcontent = await CreatorContent.addOrUpdateCreatorContent(data);
 
       if (!creatorcontent) {
@@ -265,7 +267,7 @@ async function processCreatorContentWebhook(body: TaddyWebhook) {
       ])
       return;
     }
-    case TADDY_WEBHOOK_ACTION.DELETED: {
+    case TaddyWebhookAction.DELETED: {
       const deletedCreatorContent = await CreatorContent.deleteCreatorContent(data);
 
       if (!deletedCreatorContent) {
@@ -289,7 +291,7 @@ async function processCreatorContentWebhook(body: TaddyWebhook) {
   }
 }
 
-async function sendPushNotification(taddyType: TADDY_WEBHOOK_TYPE, action: TADDY_WEBHOOK_ACTION, data: Record<string, any>) {
+async function sendPushNotification(taddyType: TaddyWebhookType, action: TaddyWebhookAction, data: Record<string, any>) {
   // const source = 'webhook'
   // const pushNotificationData = {
   //   source,

@@ -1,7 +1,7 @@
 import { ListQueuesCommand, CreateQueueCommand, ReceiveMessageCommand, DeleteMessageCommand, DeleteMessageBatchCommand, SendMessageBatchCommand, SendMessageCommand, type SendMessageCommandOutput, type Message } from "@aws-sdk/client-sqs";
 import { sqsClient } from "./sqs-client.js";
 import { uniqBy } from "lodash-es";
-import { processWebhook, TADDY_WEBHOOK_TYPE, TADDY_WEBHOOK_ACTION, type TaddyWebhook } from "../taddy/process-webhook.js";
+import { processWebhook, type TaddyWebhook } from "../taddy/process-webhook.js";
 
 export enum QUEUE_NAMES {
   INKVERSE_HIGH_PRIORITY = "INKVERSE_HIGH_PRIORITY",

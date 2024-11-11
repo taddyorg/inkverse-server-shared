@@ -8,7 +8,7 @@ const config: CodegenConfig = {
   overwrite: true,
   schema,
   generates: {
-    "graphql/types.ts": {
+    "src/shared/graphql/types.ts": {
       config: {
         mappers: {
           ComicSeries: "../database/types.js#ComicSeriesModel",

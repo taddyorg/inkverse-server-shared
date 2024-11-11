@@ -5,12 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon server.js",
-    "prod": "node server.js",
-    "codegen": "graphql-codegen --config codegen.ts",
     "migrate": "tsx ./node_modules/.bin/knex --knexfile ./database/config.ts migrate:latest",
     "migrate:rollback": "tsx ./database/list-last-batch-migrations.ts",
-    "migration-list": "tsx ./node_modules/.bin/knex --knexfile ./database/config.ts migrate:list"
+    "migrate:list": "tsx ./node_modules/.bin/knex --knexfile ./database/config.ts migrate:list"
   },
   "type": "module",
   "author": "Inkverse",
@@ -37,13 +34,9 @@
     "qs": "^6.13.0",
     "redis": "^4.7.0",
     "sharp": "^0.33.5",
-    "uuid": "^11.0.2"
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "5.0.3",
-    "@graphql-codegen/introspection": "4.0.3",
-    "@graphql-codegen/typescript": "4.1.1",
-    "@graphql-codegen/typescript-resolvers": "4.4.0",
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^22.9.0",
     "@types/uuid": "^10.0.0",

@@ -1,7 +1,11 @@
 import { GraphQLClient, gql } from 'graphql-request';
 
-export async function taddyGraphqlRequest(query: string, variables: any) {
+export async function taddyGraphqlRequest(query: string, variables: any): Promise<Record<string, any> | undefined> {
   const endpointUrl = "https://api.taddy.org/";
+
+  if (!process.env.TADDY_USER_ID || !process.env.TADDY_API_KEY) {
+    throw new Error("TADDY_USER_ID and TADDY_API_KEY must be set");
+  }
     
   const headers = {
     'Content-Type': 'application/json',
@@ -13,9 +17,10 @@ export async function taddyGraphqlRequest(query: string, variables: any) {
   try {
     const client = new GraphQLClient(endpointUrl, { headers })
     const data = await client.request(query, variables)
-    return data;
+    return data as Record<string, any>;
   }catch(e) {
     console.log("inside sentTaddyGraphqlRequest", query, variables, e)
+    return undefined;
   }
 }
 
@@ -30,7 +35,7 @@ const SEARCH_FOR_TERM_QUERY = gql`
   }
 `
 
-const GET_COMICSERIES = gql`
+const GET_COMICSERIES_QUERY = gql`
   query GetComicSeries($uuid: ID) {
     getComicSeries(uuid: $uuid) {
       uuid
@@ -64,7 +69,7 @@ const GET_COMICSERIES = gql`
   }
 `
 
-const GET_COMICSERIES_WITH_CREATOR = gql`
+const GET_COMICSERIES_WITH_CREATOR_QUERY = gql`
   query GetComicSeriesWithCreator($uuid: ID) {
     getComicSeries(uuid: $uuid) {
       uuid
@@ -88,7 +93,7 @@ const GET_COMICSERIES_WITH_CREATOR = gql`
   }
 `
 
-const GET_COMICSERIES_WITH_ISSUES = gql`
+const GET_COMICSERIES_WITH_ISSUES_QUERY = gql`
   query GetComicSeriesWithIssues($uuid: ID, $page: Int, $limitPerPage: Int) {
     getComicSeries(uuid: $uuid) {
       uuid
@@ -100,7 +105,7 @@ const GET_COMICSERIES_WITH_ISSUES = gql`
   }
 `
 
-const GET_COMICISSUE = gql`
+const GET_COMICISSUE_QUERY = gql`
   query GetComicIssue($uuid: ID) {
     getComicIssue(uuid: $uuid) {
       uuid
@@ -127,7 +132,7 @@ const GET_COMICISSUE = gql`
   }
 `
 
-const GET_CREATOR = gql`
+const GET_CREATOR_QUERY = gql`
   query GetCreator($uuid: ID) {
     getCreator(uuid: $uuid) {
       uuid
@@ -149,7 +154,7 @@ const GET_CREATOR = gql`
   }
 `
 
-const GET_CREATOR_WITH_CONTENT = gql`
+const GET_CREATOR_WITH_CONTENT_QUERY = gql`
   query GetCreatorWithContent($uuid: ID, $page: Int) {
     getCreator(uuid: $uuid) {
       uuid
@@ -161,7 +166,7 @@ const GET_CREATOR_WITH_CONTENT = gql`
   }
 `
 
-const GET_CREATORCONTENT = gql`
+const GET_CREATORCONTENT_QUERY = gql`
   query GetCreatorContent($uuid: ID) {
     getCreatorContent(uuid: $uuid) {
       uuid
@@ -175,3 +180,13 @@ const GET_CREATORCONTENT = gql`
     }
   }
 `
+
+export {
+  GET_COMICSERIES_QUERY,
+  GET_COMICSERIES_WITH_CREATOR_QUERY  ,
+  GET_COMICSERIES_WITH_ISSUES_QUERY,
+  GET_COMICISSUE_QUERY,
+  GET_CREATOR_QUERY,
+  GET_CREATOR_WITH_CONTENT_QUERY,
+  GET_CREATORCONTENT_QUERY
+}

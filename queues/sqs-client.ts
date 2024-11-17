@@ -14,8 +14,9 @@ const REGION = { region: "us-west-2" };
 
 function getEndpoint() {
 	if (process.env.NODE_ENV === 'production') { return {} }
-	else if (process.env.SQS_BASE_URL) { return { endpoint: process.env.SQS_BASE_URL?.split('/').slice(0, 3).join('/') || '' } }
-	else { throw new Error('SQS_BASE_URL is not set') }
+	else if (process.env.SQS_BASE_URL) { 
+		return { endpoint: process.env.SQS_BASE_URL?.split('/').slice(0, 3).join('/') || '' } 
+	}
 }
 
 const awsConfig = {

@@ -3,9 +3,10 @@ import { get } from "lodash-es";
 import { database, type CreatorModel } from "../database/index.js";
 import { TaddyType } from "../graphql/types.js";
 
-import { safeStringValue, safeArrayProperties, safeObjWithVariantKeys, convertTextToBoolean, prettyEncodeTitle } from "../utils/common.js";
 import { safeCountry } from "../../public/country.js";
 import { safeLinkType } from "../../public/links.js";
+
+import { safeStringValue, safeArrayProperties, safeObjWithVariantKeys, convertTextToBoolean, prettyEncodeTitle } from "../utils/common.js";
 import { UUIDLookup } from "./index.js";
 
 type CreatorInput = Omit<CreatorModel, 'id' | 'uuid' | 'createdAt' | 'updatedAt'>;

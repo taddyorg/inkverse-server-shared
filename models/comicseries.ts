@@ -1,16 +1,16 @@
 import { get } from "lodash-es";
 
-import { database, type ComicSeriesModel } from "../database/index.js";
-import { TaddyType } from "../graphql/types.js";
-import { UUIDLookup } from "./index.js";
-
 import { safeSeriesStatus } from "../../public/status.js";
 import { safeGenresArray } from "../../public/genres.js";
 import { safeLanguage } from "../../public/language.js";
 import { safeContentRating } from "../../public/ratings.js";
 import { safeSeriesType } from "../../public/series-type.js";
 import { safeLayoutType } from "../../public/layout.js";
+
+import { database, type ComicSeriesModel } from "../database/index.js";
+import { TaddyType } from "../graphql/types.js";
 import { safeStringValue, safeObjWithVariantKeys, safeArrayProperties, prettyEncodeTitle, convertTextToBoolean } from "../utils/common.js";
+import { UUIDLookup } from "./index.js";
 
 type ComicSeriesInput = Omit<ComicSeriesModel, 'id' | 'uuid' | 'createdAt' | 'updatedAt'>;
 

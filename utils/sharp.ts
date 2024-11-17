@@ -2,11 +2,11 @@ import sharp, { type Metadata } from 'sharp';
 import axios, { type AxiosRequestConfig } from 'axios';
 import type { Knex } from 'knex';
 
+import { getStoryImageUrl } from '../../public/comicstory.js';
+
 import { database } from '../database/index.js';
 import type { ComicStoryModel } from '../database/types.js';
 import { ComicStory } from '../models/index.js';
-
-import { getStoryImageUrl } from '../../public/comicstory.js';
  
 async function getMultipleHeightAndWidths(comicstories: ComicStoryModel[] ) {
     const trx: Knex.Transaction = await database.transaction()

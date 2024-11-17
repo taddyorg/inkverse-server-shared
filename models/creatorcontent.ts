@@ -1,11 +1,12 @@
 import { get } from "lodash-es";
 
+import { safeContentRole } from "../../public/roles.js";
+
 import { database, type CreatorContentModel } from "../database/index.js";
 import { SortOrder, TaddyType } from "../graphql/types.js";
 
 import { sortOrderToSQLOrderBy } from "./utils.js";
 import { safeStringValue, safeArrayProperties } from "../utils/common.js";
-import { safeContentRole } from "../../public/roles.js";
 
 type CreatorContentInput = Omit<CreatorContentModel, 'id' | 'createdAt' | 'updatedAt'>;
 

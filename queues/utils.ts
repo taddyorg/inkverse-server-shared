@@ -7,7 +7,7 @@ export enum QUEUE_NAMES {
   INKVERSE_HIGH_PRIORITY = "INKVERSE_HIGH_PRIORITY",
 }
 
-export enum INKVERSE_HIGH_PRIORITY_ACTION_TYPE {
+export enum INKVERSE_HIGH_PRIORITY_TYPE {
   PROCESS_TADDY_WEBHOOK = "PROCESS_TADDY_WEBHOOK",
 }
 
@@ -47,9 +47,9 @@ export async function createQueue(queueName: QUEUE_NAMES): Promise<string | unde
 async function doWork(queueName: QUEUE_NAMES, doc: any, inputArgs?: any, isDebugMode?: boolean, shouldDeleteMessages?: boolean): Promise<void> {
   switch (queueName) {
     case QUEUE_NAMES.INKVERSE_HIGH_PRIORITY:
-      switch (doc.action) {
-        case INKVERSE_HIGH_PRIORITY_ACTION_TYPE.PROCESS_TADDY_WEBHOOK:
-          await processWebhook(doc.data as TaddyWebhook);
+      switch (doc.type) {
+        case INKVERSE_HIGH_PRIORITY_TYPE.PROCESS_TADDY_WEBHOOK:
+          await processWebhook(doc as TaddyWebhook);
           return;
         default:
           throw new Error(`INKVERSE_HIGH_PRIORITY ERROR - Unhandled QUEUE_ACTION_TYPES case: ${doc.type}`);

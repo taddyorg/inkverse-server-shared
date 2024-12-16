@@ -23,6 +23,23 @@ export enum TaddyWebhookAction {
   DELETED = "deleted",
 }
 
+export enum TaddyWebhookValidEvents {
+  COMICSERIES_CREATED = 'comicseries.created',
+  COMICSERIES_UPDATED = 'comicseries.updated',
+  COMICSERIES_DELETED = 'comicseries.deleted',
+  COMICSERIES_NEW_ISSUES_RELEASED = 'comicseries.new_issues_released',
+  COMICISSUE_CREATED = 'comicissue.created',
+  COMICISSUE_UPDATED = 'comicissue.updated',
+  COMICISSUE_DELETED = 'comicissue.deleted',
+  CREATOR_CREATED = 'creator.created',
+  CREATOR_UPDATED = 'creator.updated',
+  CREATOR_DELETED = 'creator.deleted',
+  CREATOR_NEW_CONTENT_RELEASED = 'creator.new_content_released',
+  CREATORCONTENT_CREATED = 'creatorcontent.created',
+  CREATORCONTENT_UPDATED = 'creatorcontent.updated',
+  CREATORCONTENT_DELETED = 'creatorcontent.deleted',
+}
+
 export async function processWebhook(body: TaddyWebhook): Promise<void> {
   const { taddyType } = body;
   switch (taddyType) {

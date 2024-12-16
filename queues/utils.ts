@@ -7,7 +7,7 @@ export enum QUEUE_NAMES {
   INKVERSE_HIGH_PRIORITY = "INKVERSE_HIGH_PRIORITY",
 }
 
-export enum HIGH_PRIORITY_ACTION_TYPES {
+export enum INKVERSE_HIGH_PRIORITY_ACTION_TYPE {
   PROCESS_TADDY_WEBHOOK = "PROCESS_TADDY_WEBHOOK",
 }
 
@@ -47,8 +47,8 @@ export async function createQueue(queueName: QUEUE_NAMES): Promise<string | unde
 async function doWork(queueName: QUEUE_NAMES, doc: any, inputArgs?: any, isDebugMode?: boolean, shouldDeleteMessages?: boolean): Promise<void> {
   switch (queueName) {
     case QUEUE_NAMES.INKVERSE_HIGH_PRIORITY:
-      switch (doc.type) {
-        case HIGH_PRIORITY_ACTION_TYPES.PROCESS_TADDY_WEBHOOK:
+      switch (doc.action) {
+        case INKVERSE_HIGH_PRIORITY_ACTION_TYPE.PROCESS_TADDY_WEBHOOK:
           await processWebhook(doc.data as TaddyWebhook);
           return;
         default:
@@ -64,7 +64,7 @@ function fixRecievingArgs(docAsString: string | undefined): Record<string, any> 
   return JSON.parse(docAsString)
 }
 
-export async function recieveAndDeleteMessages(queueName: QUEUE_NAMES, limit = 10, inputArgs = {}, isDebugMode = process.env.NODE_ENV !== 'production', shouldDeleteMessages = true, fn = doWork): Promise<any> {
+export async function receiveAndDeleteMessages(queueName: QUEUE_NAMES, limit = 10, inputArgs = {}, isDebugMode = process.env.NODE_ENV !== 'production', shouldDeleteMessages = true, fn = doWork): Promise<any> {
   try {
     const QueueUrl = getQueueUrl(queueName)
 

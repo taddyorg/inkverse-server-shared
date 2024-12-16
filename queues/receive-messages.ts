@@ -1,4 +1,4 @@
-import { QUEUE_NAMES, recieveAndDeleteMessages } from "./utils.js";
+import { QUEUE_NAMES, receiveAndDeleteMessages } from "./utils.js";
 
 let shouldLoop = true;
 
@@ -23,7 +23,7 @@ async function run(){
   let countOfZeroMessagesRecieved = 0;
 
   while(shouldLoop) {
-    const data = await recieveAndDeleteMessages(queueName); 
+    const data = await receiveAndDeleteMessages(queueName); 
 
     // check to see if you should stop.
     if (shouldStopOnEmptyQueueNameSet.has(queueName)) {

@@ -1,6 +1,5 @@
 import sharp, { type Metadata } from 'sharp';
 import axios, { type AxiosRequestConfig } from 'axios';
-import type { Knex } from 'knex';
 
 import { getStoryImageUrl } from '../../public/comicstory.js';
 
@@ -9,7 +8,7 @@ import type { ComicStoryModel } from '../database/types.js';
 import { ComicStory } from '../models/index.js';
  
 async function getMultipleHeightAndWidths(comicstories: ComicStoryModel[] ) {
-    const trx: Knex.Transaction = await database.transaction()
+    const trx = await database.transaction()
     try{
 
         const savedComicStories: Partial<ComicStoryModel>[] = [];

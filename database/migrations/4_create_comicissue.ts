@@ -23,7 +23,8 @@ export async function up(knex: Knex): Promise<void> {
       table.timestamp('date_exclusive_content_is_available');
       table.index(['id']);
       table.index(['series_uuid']);
-      table.index(['position']);
+      table.index(['series_uuid', 'date_published']);
+      table.index(['series_uuid', 'position']);
     });
 }
 

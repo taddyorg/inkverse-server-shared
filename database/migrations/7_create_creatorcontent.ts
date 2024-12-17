@@ -8,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
     table.timestamp('updated_at');
     table.string('hash');
     table.uuid('content_uuid').notNullable();
-    table.string('content_type').notNullable();
+    table.specificType('content_type', 'content_type').notNullable();
     table.uuid('creator_uuid').notNullable();
     table.specificType('roles', 'varchar(255)[]');
     table.integer('position');

@@ -2,7 +2,7 @@ import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   // enum for content_type
-  await knex.raw(`CREATE TYPE content_type AS ENUM ('comicseries', 'comicissue', 'comicstory', 'creator')`);
+  await knex.raw(`CREATE TYPE content_type AS ENUM ('COMICSERIES', 'COMICISSUE', 'CREATOR')`);
 
   // create table
   await knex.schema.createTable('uuid_lookup', (table) => {

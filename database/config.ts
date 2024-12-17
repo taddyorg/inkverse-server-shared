@@ -7,7 +7,7 @@ import knexStringcase from 'knex-stringcase';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const envPath = path.resolve('.env');
+const envPath = path.resolve(__dirname, '../../../.env');
 dotenv.config({ path: envPath });
 
 const connectionString = `postgres://${process.env.DATABASE_USERNAME}:${process.env.DATABASE_PASSWORD}@${process.env.DATABASE_ENDPOINT}:${process.env.DATABASE_PORT || '5432'}/${process.env.DATABASE_NAME || 'inkverse'}`;

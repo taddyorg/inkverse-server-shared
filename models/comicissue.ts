@@ -138,7 +138,7 @@ export class ComicIssue {
         .transacting(trx)
         .insert({
           uuid,
-          ...getIssueDetails({ data }),
+          ...getIssueDetails(data),
         })
         .returning('*');
 
@@ -175,7 +175,7 @@ export class ComicIssue {
         })
         .update({
           updatedAt: new Date(),
-          ...getIssueDetails({ data })
+          ...getIssueDetails(data),
         })
         .returning('*');
 

@@ -72,7 +72,7 @@ export class CreatorContent {
     const creatorcontentdata = getCreatorContentDetails(data);
     const [creatorcontent] = await database("creatorcontent")
       .insert(creatorcontentdata)
-      .onConflict(['creatorUuid', 'contentUuid', 'contentType'])
+      .onConflict(['creatorUuid', 'contentUuid'])
       .merge({
         updatedAt: new Date(),
         ...creatorcontentdata

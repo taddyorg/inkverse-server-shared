@@ -112,6 +112,29 @@ export class ComicStory {
     return updatedStories;
   }
 
+  static async updateHeightAndWidthForComicStory(uuid: string, issueUuid: string, seriesUuid: string, width: number, height: number): Promise<ComicStoryModel | undefined> {
+    try {
+      const [story] = await database('comicstory')
+        .where({
+          uuid,
+          issueUuid,
+          seriesUuid,
+        })
+        .update({
+          updatedAt: new Date(),
+          width,
+          height,
+        })
+        .returning('*');
+      
+      return story
+    }
+    catch (e) {
+      console.log('updateComicStory transaction rollback', issueUuid, e);
+      throw e;
+    }
+  }
+
   static async setComicStoriesAsRemoved(
     trx: Knex.Transaction,
     uuids: string[]

@@ -88,7 +88,7 @@ export class ComicIssue {
       .limit(limit);
   }
 
-  static async getComicIssueForSeries(seriesUuid: string, sortOrder: SortOrder = SortOrder.Oldest): Promise<ComicIssueModel | null> {
+  static async getComicIssueForSeries(seriesUuid: string, sortOrder: SortOrder = SortOrder.LATEST): Promise<ComicIssueModel | null> {
     return await database.select(['comicissue.*'])
       .from('comicseries')
       .rightJoin('comicissue', 'comicseries.uuid', 'comicissue.series_uuid')
@@ -99,7 +99,7 @@ export class ComicIssue {
 
   static async getComicIssuesForSeries(
     seriesUuid: string,
-    sortOrder: SortOrder = SortOrder.Latest,
+    sortOrder: SortOrder = SortOrder.LATEST,
     limit: number = 10,
     offset: number = 0,
     includeRemovedIssues: boolean = false
@@ -132,7 +132,7 @@ export class ComicIssue {
     const { uuid, seriesUuid } = data;
     var trx = await database.transaction();
     try {
-      await UUIDLookup.saveUUIDforType(trx, uuid, TaddyType.Comicissue);
+      await UUIDLookup.saveUUIDforType(trx, uuid, TaddyType.COMICISSUE);
       const storiesData = get(data, 'stories', []);
       const [comicissue] = await database('comicissue')
         .transacting(trx)

@@ -277,7 +277,7 @@ function getCloudflareDataObject(type: CacheType, id?:string, shortUrl?:string) 
       return { purge_everything: true }
     case CacheType.COMICSERIES:
     case CacheType.CREATOR:
-      return { files: [getInkverseUrl(InkverseUrlType.CREATOR, id, shortUrl)] }
+      return { files: [getInkverseUrl({ type: InkverseUrlType.CREATOR, shortUrl })] }
     case CacheType.SITEMAP:
       return { files: [`https://ink0.inkverse.co/sitemap/${id}`] }
     default:

@@ -54,7 +54,7 @@ export class CreatorContent {
 
   static async getContentForCreator(
     creatorUuid: string,
-    sortOrder: SortOrder | undefined = SortOrder.Latest,
+    sortOrder: SortOrder | undefined = SortOrder.LATEST,
     offset: number | undefined = 0,
     limit: number | undefined = 10
   ): Promise<CreatorContentModel[]> {

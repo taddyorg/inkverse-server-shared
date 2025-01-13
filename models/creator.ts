@@ -86,7 +86,7 @@ export class Creator {
     var trx = await database.transaction();
     try {
       const shortUrl = await Creator.getShortUrl(uuid, name);
-      await UUIDLookup.saveUUIDforType(trx, uuid, TaddyType.Creator);
+      await UUIDLookup.saveUUIDforType(trx, uuid, TaddyType.CREATOR);
       const [ creator ] = await database("creator")
         .transacting(trx)
         .insert({

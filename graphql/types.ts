@@ -1,4 +1,5 @@
 import type { GraphQLResolveInfo } from 'graphql';
+import type { ComicSeriesModel, ComicIssueModel, ComicStoryModel, CreatorModel, CreatorContentModel } from '../database/types.js';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -6,6 +7,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
@@ -57,6 +59,14 @@ export type ComicIssue = {
   uuid: Scalars['ID']['output'];
 };
 
+export type ComicIssueForSeries = {
+  __typename?: 'ComicIssueForSeries';
+  /**  The issues  */
+  issues?: Maybe<Array<Maybe<ComicIssue>>>;
+  /**  Series uuid  */
+  seriesUuid: Scalars['ID']['output'];
+};
+
 /**  Comic Series Details  */
 export type ComicSeries = {
   __typename?: 'ComicSeries';
@@ -90,8 +100,6 @@ export type ComicSeries = {
   isCompleted?: Maybe<Scalars['Boolean']['output']>;
   /**  Number of issues in a comic series  */
   issueCount?: Maybe<Scalars['Int']['output']>;
-  /**  A list of issues for this comic series  */
-  issues?: Maybe<Array<Maybe<ComicIssue>>>;
   /**  A hash of the details for all issues for this comic. It may be useful for you to save this property in your database and compare it to know if there are any new or updated issues since the last time you checked  */
   issuesHash?: Maybe<Scalars['String']['output']>;
   /**  The language the comic series is in  */
@@ -118,16 +126,6 @@ export type ComicSeries = {
   thumbnailImageAsString?: Maybe<Scalars['String']['output']>;
   /**  Unique identifier for this comic  */
   uuid: Scalars['ID']['output'];
-};
-
-
-/**  Comic Series Details  */
-export type ComicSeriesIssuesArgs = {
-  includeRemovedIssues?: InputMaybe<Scalars['Boolean']['input']>;
-  limitPerPage?: InputMaybe<Scalars['Int']['input']>;
-  page?: InputMaybe<Scalars['Int']['input']>;
-  searchTerm?: InputMaybe<Scalars['String']['input']>;
-  sortOrder?: InputMaybe<SortOrder>;
 };
 
 /**  Layout types for comic series  */
@@ -807,7 +805,7 @@ export type Query = {
   /**  Get documentation  */
   getDocumentation?: Maybe<Documentation>;
   /**  Get multiple issues for a comic series  */
-  getIssuesForComicSeries: Array<Maybe<ComicIssue>>;
+  getIssuesForComicSeries?: Maybe<ComicIssueForSeries>;
 };
 
 
@@ -852,8 +850,8 @@ export type QueryGetDocumentationArgs = {
 
 export type QueryGetIssuesForComicSeriesArgs = {
   includeRemovedIssues?: InputMaybe<Scalars['Boolean']['input']>;
-  limitPerPage: Scalars['Int']['input'];
-  page: Scalars['Int']['input'];
+  limitPerPage?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
   seriesUuid: Scalars['ID']['input'];
   sortOrder?: InputMaybe<SortOrder>;
 };
@@ -956,16 +954,17 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  ComicIssue: ResolverTypeWrapper<ComicIssue>;
-  ComicSeries: ResolverTypeWrapper<ComicSeries>;
+  ComicIssue: ResolverTypeWrapper<ComicIssueModel>;
+  ComicIssueForSeries: ResolverTypeWrapper<Omit<ComicIssueForSeries, 'issues'> & { issues?: Maybe<Array<Maybe<ResolversTypes['ComicIssue']>>> }>;
+  ComicSeries: ResolverTypeWrapper<ComicSeriesModel>;
   ComicSeriesLayoutType: ComicSeriesLayoutType;
   ComicSeriesType: ComicSeriesType;
-  ComicStory: ResolverTypeWrapper<ComicStory>;
+  ComicStory: ResolverTypeWrapper<ComicStoryModel>;
   ContentRating: ContentRating;
   ContentRole: ContentRole;
   Country: Country;
-  Creator: ResolverTypeWrapper<Creator>;
-  CreatorContent: ResolverTypeWrapper<CreatorContent>;
+  Creator: ResolverTypeWrapper<CreatorModel>;
+  CreatorContent: ResolverTypeWrapper<CreatorContentModel>;
   CreatorLinkDetails: ResolverTypeWrapper<CreatorLinkDetails>;
   Documentation: ResolverTypeWrapper<Documentation>;
   Genre: Genre;
@@ -984,11 +983,12 @@ export type ResolversTypes = ResolversObject<{
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
   Boolean: Scalars['Boolean']['output'];
-  ComicIssue: ComicIssue;
-  ComicSeries: ComicSeries;
-  ComicStory: ComicStory;
-  Creator: Creator;
-  CreatorContent: CreatorContent;
+  ComicIssue: ComicIssueModel;
+  ComicIssueForSeries: Omit<ComicIssueForSeries, 'issues'> & { issues?: Maybe<Array<Maybe<ResolversParentTypes['ComicIssue']>>> };
+  ComicSeries: ComicSeriesModel;
+  ComicStory: ComicStoryModel;
+  Creator: CreatorModel;
+  CreatorContent: CreatorContentModel;
   CreatorLinkDetails: CreatorLinkDetails;
   Documentation: Documentation;
   ID: Scalars['ID']['output'];
@@ -1020,6 +1020,12 @@ export type ComicIssueResolvers<ContextType = any, ParentType extends ResolversP
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type ComicIssueForSeriesResolvers<ContextType = any, ParentType extends ResolversParentTypes['ComicIssueForSeries'] = ResolversParentTypes['ComicIssueForSeries']> = ResolversObject<{
+  issues?: Resolver<Maybe<Array<Maybe<ResolversTypes['ComicIssue']>>>, ParentType, ContextType>;
+  seriesUuid?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type ComicSeriesResolvers<ContextType = any, ParentType extends ResolversParentTypes['ComicSeries'] = ResolversParentTypes['ComicSeries']> = ResolversObject<{
   bannerImageAsString?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   contentRating?: Resolver<Maybe<ResolversTypes['ContentRating']>, ParentType, ContextType>;
@@ -1036,7 +1042,6 @@ export type ComicSeriesResolvers<ContextType = any, ParentType extends Resolvers
   isBlocked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isCompleted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   issueCount?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  issues?: Resolver<Maybe<Array<Maybe<ResolversTypes['ComicIssue']>>>, ParentType, ContextType, Partial<ComicSeriesIssuesArgs>>;
   issuesHash?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   language?: Resolver<Maybe<ResolversTypes['Language']>, ParentType, ContextType>;
   layoutType?: Resolver<Maybe<ResolversTypes['ComicSeriesLayoutType']>, ParentType, ContextType>;
@@ -1129,11 +1134,12 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
   getCreatorContent?: Resolver<Maybe<ResolversTypes['CreatorContent']>, ParentType, ContextType, Partial<QueryGetCreatorContentArgs>>;
   getCreatorLinksForSeries?: Resolver<Maybe<Array<Maybe<ResolversTypes['CreatorLinkDetails']>>>, ParentType, ContextType, RequireFields<QueryGetCreatorLinksForSeriesArgs, 'contentType' | 'contentUuid'>>;
   getDocumentation?: Resolver<Maybe<ResolversTypes['Documentation']>, ParentType, ContextType, RequireFields<QueryGetDocumentationArgs, 'id'>>;
-  getIssuesForComicSeries?: Resolver<Array<Maybe<ResolversTypes['ComicIssue']>>, ParentType, ContextType, RequireFields<QueryGetIssuesForComicSeriesArgs, 'limitPerPage' | 'page' | 'seriesUuid'>>;
+  getIssuesForComicSeries?: Resolver<Maybe<ResolversTypes['ComicIssueForSeries']>, ParentType, ContextType, RequireFields<QueryGetIssuesForComicSeriesArgs, 'seriesUuid'>>;
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{
   ComicIssue?: ComicIssueResolvers<ContextType>;
+  ComicIssueForSeries?: ComicIssueForSeriesResolvers<ContextType>;
   ComicSeries?: ComicSeriesResolvers<ContextType>;
   ComicStory?: ComicStoryResolvers<ContextType>;
   Creator?: CreatorResolvers<ContextType>;

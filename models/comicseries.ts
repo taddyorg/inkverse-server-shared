@@ -121,7 +121,7 @@ export class ComicSeries {
     var trx = await database.transaction();
     try {
       const shortUrl = await ComicSeries.getShortUrl(uuid, name);
-      await UUIDLookup.saveUUIDforType(trx, uuid, TaddyType.Comicseries);
+      await UUIDLookup.saveUUIDforType(trx, uuid, TaddyType.COMICSERIES);
       const [comicseries] = await database("comicseries")
         .transacting(trx)
         .insert({

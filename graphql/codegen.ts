@@ -10,6 +10,13 @@ const config: CodegenConfig = {
   generates: {
     "src/shared/graphql/types.ts": {
       config: {
+        mappers: {
+          ComicSeries: "../database/types.js#ComicSeriesModel",
+          ComicIssue: "../database/types.js#ComicIssueModel",
+          ComicStory: "../database/types.js#ComicStoryModel",
+          Creator: "../database/types.js#CreatorModel",
+          CreatorContent: "../database/types.js#CreatorContentModel",
+        },
         useIndexSignature: true,
         useTypeImports: true,
         namingConvention: {

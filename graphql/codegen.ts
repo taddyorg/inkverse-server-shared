@@ -16,6 +16,7 @@ const config: CodegenConfig = {
           ComicStory: "../database/types.js#ComicStoryModel",
           Creator: "../database/types.js#CreatorModel",
           CreatorContent: "../database/types.js#CreatorContentModel",
+          List: "../database/types.js#ListModel",
         },
         useIndexSignature: true,
         useTypeImports: true,

@@ -1,5 +1,5 @@
 import type { GraphQLResolveInfo } from 'graphql';
-import type { ComicSeriesModel, ComicIssueModel, ComicStoryModel, CreatorModel, CreatorContentModel } from '../database/types.js';
+import type { ComicSeriesModel, ComicIssueModel, ComicStoryModel, CreatorModel, CreatorContentModel, ListModel } from '../database/types.js';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -1091,7 +1091,7 @@ export type ResolversTypes = ResolversObject<{
   Language: Language;
   LinkDetails: ResolverTypeWrapper<LinkDetails>;
   LinkType: LinkType;
-  List: ResolverTypeWrapper<Omit<List, 'comicSeries'> & { comicSeries?: Maybe<Array<Maybe<ResolversTypes['ComicSeries']>>> }>;
+  List: ResolverTypeWrapper<ListModel>;
   ListType: ListType;
   PrivacyType: PrivacyType;
   Query: ResolverTypeWrapper<{}>;
@@ -1117,7 +1117,7 @@ export type ResolversParentTypes = ResolversObject<{
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   LinkDetails: LinkDetails;
-  List: Omit<List, 'comicSeries'> & { comicSeries?: Maybe<Array<Maybe<ResolversParentTypes['ComicSeries']>>> };
+  List: ListModel;
   Query: {};
   String: Scalars['String']['output'];
 }>;

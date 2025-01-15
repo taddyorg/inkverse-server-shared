@@ -1,3 +1,6 @@
+import type { ListModel } from "../database/index.js"
+import { ListType, PrivacyType } from "../database/index.js"
+
 export const mostPopularComicSeriesUuids = [
   "a7046949-a79d-4471-b3e0-9c6df652b9c8",
   "fb20203b-0e55-4e7c-a213-c0cd1e74fd0f",
@@ -153,25 +156,14 @@ export const featuredComicSeriesUuids = [
   ...monsterLoversComicSeriesUuids,
 ]
 
-export type ListModel = {
-  id: string;
-  name: string;
-  description: string;
-  bannerImageUrl: string;
-  type: string;
-  privacyType: string;
-  userId: number;
-  uuids: string[];
-}
-
 export const curatedListsData: { [key: string]: ListModel } = {
   "1": {
     id: "1",
     name: 'Most Recommended',
     description: "Here's a list of the most recommended Webtoons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/most-recommended.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : mostPopularComicSeriesUuids,
   },
@@ -180,8 +172,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
     name: 'Friends to Lovers',
     description: "Here's a list of great friends to lovers Webtoons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/friends-to-lovers.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : friendsToLoversComicSeriesUuids,
   },
@@ -190,8 +182,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
     name: 'Enemies to Lovers',
     description: "Here's a list of awesome enemies to lovers Webtoons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/enemies-to-lovers.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : enemiesToLoversComicSeriesUuids,
   },
@@ -200,8 +192,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
     name: 'Female Leads',
     description: "Here's a list of FL (female leads) Webtoons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/female-leads.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : femaleLeadComicSeriesUuids,
   },
@@ -210,8 +202,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
     name: 'Sent to Another World',
     description: "Here's a list of Sent to Another World Webtoons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/sent-to-another-world.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : isekaiComicSeriesUuids,
   },
@@ -220,8 +212,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
     name: 'Spooky Toons',
     description: "Here's a list of Spooky Toons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/spooky-toons.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : spookyToonsComicSeriesUuids,
   },
@@ -230,8 +222,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
     name: 'Wholesome Comics',
     description: "Here's a list of Wholesome Comfort Comics Webtoons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/comfort-comics.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : wholesomeComicSeriesUuids,
   },
@@ -240,8 +232,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
     name: 'Spicy',
     description: "Here's a list of Spicy Webtoons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/spicy.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : spicyComicSeriesUuids,
   },
@@ -250,8 +242,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
     name: 'LGBT',
     description: "Here's a list of LGBT Webtoons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/lgbt.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : LGBTComicSeriesUuids,
   },
@@ -260,8 +252,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
     name: 'Monster Lovers',
     description: "Here's a list of Monster Lovers Webtoons on Inkverse!",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/monster-lovers.webp',
-    type: "COMICSERIES",
-    privacyType: "PUBLIC",
+    type: ListType.COMICSERIES,
+    privacyType: PrivacyType.PUBLIC,
     userId: 2,
     uuids : monsterLoversComicSeriesUuids,
   }

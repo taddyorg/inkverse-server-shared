@@ -119,3 +119,26 @@ export type UUIDLookupModel = {
   createdAt: Date;
   updatedAt: Date | null;
 }
+
+export enum ListType {
+  COMICSERIES = 'COMICSERIES',
+  COMICISSUE = 'COMICISSUE',
+  CREATOR = 'CREATOR',
+}
+
+export enum PrivacyType {
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+}
+
+export type ListModel = {
+  id: string;
+  name: string;
+  description: string;
+  bannerImageUrl: string;
+  type: ListType;
+  privacyType: PrivacyType;
+  userId: number;
+  uuids: string[];
+  comicSeries?: (ComicSeriesModel | null)[] | null | undefined;
+}

@@ -7,10 +7,13 @@ import { safeContentRating } from "../../public/ratings.js";
 import { safeSeriesType } from "../../public/series-type.js";
 import { safeLayoutType } from "../../public/layout.js";
 
-import { database, type ComicSeriesModel } from "../database/index.js";
+import { database, type ComicIssueModel, type ComicSeriesModel } from "../database/index.js";
 import { TaddyType } from "../graphql/types.js";
-import { safeStringValue, safeObjWithVariantKeys, safeArrayProperties, prettyEncodeTitle, convertTextToBoolean } from "../utils/common.js";
+import { safeStringValue, safeObjWithVariantKeys, safeArrayProperties, prettyEncodeTitle, convertTextToBoolean, convertToCamelCase } from "../utils/common.js";
 import { UUIDLookup } from "./index.js";
+import { setSimpleCache } from "../utils/simplecache.js";
+import { getSimpleCache } from "../utils/simplecache.js";
+import { arrayToObject } from "@/public/utils.js";
 
 type ComicSeriesInput = Omit<ComicSeriesModel, 'id' | 'uuid' | 'createdAt' | 'updatedAt'>;
 
@@ -80,10 +83,68 @@ export class ComicSeries {
       .first();
   }
 
+  static async getComicSeriesByUuids(uuids: string[]): Promise<ComicSeriesModel[]> {
+    return await database('comicseries')
+      .whereIn('uuid', uuids)
+      .returning('*');
+  }
+
   static async getComicSeriesByShortUrl(shortUrl: string): Promise<ComicSeriesModel | null> {
     return await database('comicseries')
       .where({ shortUrl })
       .first();
+  }
+
+  static async getRecentlyAddedComicSeries(page: number, limitPerPage: number): Promise<ComicSeriesModel[]> {
+    return await database('comicseries')
+      .orderBy('created_at', 'desc')
+      .andWhere('is_blocked', false)
+      .limit(limitPerPage)
+      .offset((page - 1) * limitPerPage)
+      .returning('*');
+  }
+
+  static async getRecentlyUpdatedComicSeries(page: number, limitPerPage: number): Promise<ComicSeriesModel[]> {
+    const comicissuesRawPromise = database.raw(`
+      SELECT * 
+      FROM (
+        SELECT *, ROW_NUMBER() OVER(PARTITION BY series_uuid ORDER BY date_published DESC) AS rn
+        FROM comicissue
+        WHERE date_published < EXTRACT(EPOCH FROM NOW()) * 1000
+      ) AS ranked_issues
+      WHERE rn = 1
+      ORDER BY date_published DESC
+      LIMIT ${limitPerPage} OFFSET ${(page - 1) * limitPerPage}
+    `)
+
+    const comicseriesRecentlyAddedPromise = ComicSeries.getRecentlyAddedComicSeries(page, limitPerPage);
+
+    const [comicissuesRaw, comicseriesRecentlyAdded] = await Promise.all([comicissuesRawPromise, comicseriesRecentlyAddedPromise]);
+
+    const comicissues: ComicIssueModel[] = comicissuesRaw.rows.map((issue: any) => convertToCamelCase(issue));
+
+    const seriesUuidsOutOfOrder = comicissues.map(issue => issue.seriesUuid);
+    const seriesUuidsRecentlyAdded = comicseriesRecentlyAdded.map(series => series.uuid);
+    const oldUpdatedComicseriesUuids: string[] = getSimpleCache('recently-updated-comicseries') as string[] || [];
+    const oldUpdatedComicseriesUuidsSet = new Set(oldUpdatedComicseriesUuids);
+    const seriesUuidsRecentlyAddedSet = new Set(seriesUuidsRecentlyAdded);
+
+    const seriesUuidsNotInCache = seriesUuidsOutOfOrder.filter(uuid => !oldUpdatedComicseriesUuidsSet.has(uuid));
+    const seriesUuidsInCache = seriesUuidsOutOfOrder.filter(uuid => oldUpdatedComicseriesUuidsSet.has(uuid));
+    const seriesUuids = [...seriesUuidsNotInCache, ...seriesUuidsInCache].filter(uuid => !seriesUuidsRecentlyAddedSet.has(uuid));
+
+    const comicseriesOutOfOrder = await ComicSeries.getComicSeriesByUuids(seriesUuids);
+
+    const comicseriesObj = arrayToObject(comicseriesOutOfOrder, 'uuid');
+    const comicseries = seriesUuids
+      .map(uuid => comicseriesObj[uuid])
+      .filter(series => series && !series.isBlocked)
+      .slice(0, limitPerPage)
+      .filter(series => series != undefined)
+
+    const seriesUuidsForCache = comicseries.map(series => series.uuid);
+    setSimpleCache('recently-updated-comicseries', seriesUuidsForCache);
+    return comicseries;
   }
 
   static async getShortUrl(uuid: string, name: string): Promise<string> {

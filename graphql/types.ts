@@ -501,7 +501,10 @@ export type CreatorContent = {
   creatorUuid?: Maybe<Scalars['ID']['output']>;
   /**  A hash of all creatorcontent details  */
   hash?: Maybe<Scalars['String']['output']>;
-  /**  (Old) Unique identifier for this creatorcontent  */
+  /**
+   *  Unique identifier for this creatorcontent
+   * @deprecated Use uuid instead
+   */
   id?: Maybe<Scalars['ID']['output']>;
   /**  Position on the creator feed  */
   position?: Maybe<Scalars['Int']['output']>;
@@ -561,6 +564,22 @@ export enum Genre {
   COMICSERIES_THRILLER = 'COMICSERIES_THRILLER',
   COMICSERIES_ZOMBIES = 'COMICSERIES_ZOMBIES'
 }
+
+export type HomeScreenComicSeries = {
+  __typename?: 'HomeScreenComicSeries';
+  /**  List of comic series  */
+  comicSeries?: Maybe<Array<Maybe<ComicSeries>>>;
+  /**  Id of the home screen comic series  */
+  id?: Maybe<Scalars['ID']['output']>;
+};
+
+export type HomeScreenCuratedList = {
+  __typename?: 'HomeScreenCuratedList';
+  /**  Id of the home screen curated list  */
+  id?: Maybe<Scalars['ID']['output']>;
+  /**  List of curated lists  */
+  lists?: Maybe<Array<Maybe<List>>>;
+};
 
 /**  Languages (ISO 639-2 https://en.wikipedia.org/wiki/List_of_ISO_639-2_codes)  */
 export enum Language {
@@ -788,6 +807,55 @@ export enum LinkType {
   YOUTUBE = 'YOUTUBE'
 }
 
+/**  List Details  */
+export type List = {
+  __typename?: 'List';
+  /**  The url for the banner image  */
+  bannerImageUrl?: Maybe<Scalars['String']['output']>;
+  /**  Comic series items in this list  */
+  comicSeries?: Maybe<Array<Maybe<ComicSeries>>>;
+  /**  Rating of the comic series  */
+  contentRating?: Maybe<ContentRating>;
+  /**  The date this list was created  */
+  createdAt?: Maybe<Scalars['Int']['output']>;
+  /**  The description for a list  */
+  description?: Maybe<Scalars['String']['output']>;
+  /**  Genres for the comic series  */
+  genres?: Maybe<Array<Maybe<Genre>>>;
+  /**  Unique identifier for this list  */
+  id: Scalars['ID']['output'];
+  /**  The language the comic series is in  */
+  language?: Maybe<Language>;
+  /**  The name (title) for a list  */
+  name?: Maybe<Scalars['String']['output']>;
+  /**  A boolean indicating whether this list is private  */
+  privacyType: PrivacyType;
+  /**  Tags for the comic series  */
+  tags?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /**  The type of this list  */
+  type: ListType;
+  /**  The user id of the user who created this list  */
+  userId: Scalars['ID']['output'];
+};
+
+/**  The type of list  */
+export enum ListType {
+  /**  A list of comic issues  */
+  COMICISSUES = 'COMICISSUES',
+  /**  A list of comic series  */
+  COMICSERIES = 'COMICSERIES',
+  /**  A list of creators  */
+  CREATORS = 'CREATORS'
+}
+
+/**  The privacy types for a list  */
+export enum PrivacyType {
+  /**  The list is private  */
+  PRIVATE = 'PRIVATE',
+  /**  The list is public  */
+  PUBLIC = 'PUBLIC'
+}
+
 export type Query = {
   __typename?: 'Query';
   /**  Get details on a comic issue */
@@ -802,15 +870,28 @@ export type Query = {
   getCreatorContent?: Maybe<CreatorContent>;
   /**  Get efficient links for creators of content  */
   getCreatorLinksForSeries?: Maybe<Array<Maybe<CreatorLinkDetails>>>;
+  /**  Get a list of curated lists  */
+  getCuratedLists?: Maybe<HomeScreenCuratedList>;
   /**  Get documentation  */
   getDocumentation?: Maybe<Documentation>;
+  /**  Get a list of featured comics  */
+  getFeaturedComicSeries?: Maybe<HomeScreenComicSeries>;
   /**  Get multiple issues for a comic series  */
   getIssuesForComicSeries?: Maybe<ComicIssueForSeries>;
+  /**  Get details on a List  */
+  getList?: Maybe<List>;
+  /**  Get a list of most popular comics  */
+  getMostPopularComicSeries?: Maybe<HomeScreenComicSeries>;
+  /**  Get a list of recently added comics  */
+  getRecentlyAddedComicSeries?: Maybe<HomeScreenComicSeries>;
+  /**  Get a list of recently updated comics  */
+  getRecentlyUpdatedComicSeries?: Maybe<HomeScreenComicSeries>;
 };
 
 
 export type QueryGetComicIssueArgs = {
-  uuid?: InputMaybe<Scalars['ID']['input']>;
+  seriesUuid: Scalars['ID']['input'];
+  uuid: Scalars['ID']['input'];
 };
 
 
@@ -843,8 +924,20 @@ export type QueryGetCreatorLinksForSeriesArgs = {
 };
 
 
+export type QueryGetCuratedListsArgs = {
+  limitPerPage?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type QueryGetDocumentationArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetFeaturedComicSeriesArgs = {
+  limitPerPage?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -854,6 +947,29 @@ export type QueryGetIssuesForComicSeriesArgs = {
   page?: InputMaybe<Scalars['Int']['input']>;
   seriesUuid: Scalars['ID']['input'];
   sortOrder?: InputMaybe<SortOrder>;
+};
+
+
+export type QueryGetListArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryGetMostPopularComicSeriesArgs = {
+  limitPerPage?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryGetRecentlyAddedComicSeriesArgs = {
+  limitPerPage?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type QueryGetRecentlyUpdatedComicSeriesArgs = {
+  limitPerPage?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /**  Status of Series  */
@@ -968,11 +1084,16 @@ export type ResolversTypes = ResolversObject<{
   CreatorLinkDetails: ResolverTypeWrapper<CreatorLinkDetails>;
   Documentation: ResolverTypeWrapper<Documentation>;
   Genre: Genre;
+  HomeScreenComicSeries: ResolverTypeWrapper<Omit<HomeScreenComicSeries, 'comicSeries'> & { comicSeries?: Maybe<Array<Maybe<ResolversTypes['ComicSeries']>>> }>;
+  HomeScreenCuratedList: ResolverTypeWrapper<Omit<HomeScreenCuratedList, 'lists'> & { lists?: Maybe<Array<Maybe<ResolversTypes['List']>>> }>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Language: Language;
   LinkDetails: ResolverTypeWrapper<LinkDetails>;
   LinkType: LinkType;
+  List: ResolverTypeWrapper<Omit<List, 'comicSeries'> & { comicSeries?: Maybe<Array<Maybe<ResolversTypes['ComicSeries']>>> }>;
+  ListType: ListType;
+  PrivacyType: PrivacyType;
   Query: ResolverTypeWrapper<{}>;
   SeriesStatus: SeriesStatus;
   SortOrder: SortOrder;
@@ -991,9 +1112,12 @@ export type ResolversParentTypes = ResolversObject<{
   CreatorContent: CreatorContentModel;
   CreatorLinkDetails: CreatorLinkDetails;
   Documentation: Documentation;
+  HomeScreenComicSeries: Omit<HomeScreenComicSeries, 'comicSeries'> & { comicSeries?: Maybe<Array<Maybe<ResolversParentTypes['ComicSeries']>>> };
+  HomeScreenCuratedList: Omit<HomeScreenCuratedList, 'lists'> & { lists?: Maybe<Array<Maybe<ResolversParentTypes['List']>>> };
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   LinkDetails: LinkDetails;
+  List: Omit<List, 'comicSeries'> & { comicSeries?: Maybe<Array<Maybe<ResolversParentTypes['ComicSeries']>>> };
   Query: {};
   String: Scalars['String']['output'];
 }>;
@@ -1120,21 +1244,56 @@ export type DocumentationResolvers<ContextType = any, ParentType extends Resolve
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type HomeScreenComicSeriesResolvers<ContextType = any, ParentType extends ResolversParentTypes['HomeScreenComicSeries'] = ResolversParentTypes['HomeScreenComicSeries']> = ResolversObject<{
+  comicSeries?: Resolver<Maybe<Array<Maybe<ResolversTypes['ComicSeries']>>>, ParentType, ContextType>;
+  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type HomeScreenCuratedListResolvers<ContextType = any, ParentType extends ResolversParentTypes['HomeScreenCuratedList'] = ResolversParentTypes['HomeScreenCuratedList']> = ResolversObject<{
+  id?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  lists?: Resolver<Maybe<Array<Maybe<ResolversTypes['List']>>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type LinkDetailsResolvers<ContextType = any, ParentType extends ResolversParentTypes['LinkDetails'] = ResolversParentTypes['LinkDetails']> = ResolversObject<{
   type?: Resolver<Maybe<ResolversTypes['LinkType']>, ParentType, ContextType>;
   url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type ListResolvers<ContextType = any, ParentType extends ResolversParentTypes['List'] = ResolversParentTypes['List']> = ResolversObject<{
+  bannerImageUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  comicSeries?: Resolver<Maybe<Array<Maybe<ResolversTypes['ComicSeries']>>>, ParentType, ContextType>;
+  contentRating?: Resolver<Maybe<ResolversTypes['ContentRating']>, ParentType, ContextType>;
+  createdAt?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  genres?: Resolver<Maybe<Array<Maybe<ResolversTypes['Genre']>>>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  language?: Resolver<Maybe<ResolversTypes['Language']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  privacyType?: Resolver<ResolversTypes['PrivacyType'], ParentType, ContextType>;
+  tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['ListType'], ParentType, ContextType>;
+  userId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  getComicIssue?: Resolver<Maybe<ResolversTypes['ComicIssue']>, ParentType, ContextType, Partial<QueryGetComicIssueArgs>>;
+  getComicIssue?: Resolver<Maybe<ResolversTypes['ComicIssue']>, ParentType, ContextType, RequireFields<QueryGetComicIssueArgs, 'seriesUuid' | 'uuid'>>;
   getComicSeries?: Resolver<Maybe<ResolversTypes['ComicSeries']>, ParentType, ContextType, Partial<QueryGetComicSeriesArgs>>;
   getComicStory?: Resolver<Maybe<ResolversTypes['ComicStory']>, ParentType, ContextType, Partial<QueryGetComicStoryArgs>>;
   getCreator?: Resolver<Maybe<ResolversTypes['Creator']>, ParentType, ContextType, Partial<QueryGetCreatorArgs>>;
   getCreatorContent?: Resolver<Maybe<ResolversTypes['CreatorContent']>, ParentType, ContextType, Partial<QueryGetCreatorContentArgs>>;
   getCreatorLinksForSeries?: Resolver<Maybe<Array<Maybe<ResolversTypes['CreatorLinkDetails']>>>, ParentType, ContextType, RequireFields<QueryGetCreatorLinksForSeriesArgs, 'contentType' | 'contentUuid'>>;
+  getCuratedLists?: Resolver<Maybe<ResolversTypes['HomeScreenCuratedList']>, ParentType, ContextType, Partial<QueryGetCuratedListsArgs>>;
   getDocumentation?: Resolver<Maybe<ResolversTypes['Documentation']>, ParentType, ContextType, RequireFields<QueryGetDocumentationArgs, 'id'>>;
+  getFeaturedComicSeries?: Resolver<Maybe<ResolversTypes['HomeScreenComicSeries']>, ParentType, ContextType, Partial<QueryGetFeaturedComicSeriesArgs>>;
   getIssuesForComicSeries?: Resolver<Maybe<ResolversTypes['ComicIssueForSeries']>, ParentType, ContextType, RequireFields<QueryGetIssuesForComicSeriesArgs, 'seriesUuid'>>;
+  getList?: Resolver<Maybe<ResolversTypes['List']>, ParentType, ContextType, RequireFields<QueryGetListArgs, 'id'>>;
+  getMostPopularComicSeries?: Resolver<Maybe<ResolversTypes['HomeScreenComicSeries']>, ParentType, ContextType, Partial<QueryGetMostPopularComicSeriesArgs>>;
+  getRecentlyAddedComicSeries?: Resolver<Maybe<ResolversTypes['HomeScreenComicSeries']>, ParentType, ContextType, Partial<QueryGetRecentlyAddedComicSeriesArgs>>;
+  getRecentlyUpdatedComicSeries?: Resolver<Maybe<ResolversTypes['HomeScreenComicSeries']>, ParentType, ContextType, Partial<QueryGetRecentlyUpdatedComicSeriesArgs>>;
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{
@@ -1146,7 +1305,10 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   CreatorContent?: CreatorContentResolvers<ContextType>;
   CreatorLinkDetails?: CreatorLinkDetailsResolvers<ContextType>;
   Documentation?: DocumentationResolvers<ContextType>;
+  HomeScreenComicSeries?: HomeScreenComicSeriesResolvers<ContextType>;
+  HomeScreenCuratedList?: HomeScreenCuratedListResolvers<ContextType>;
   LinkDetails?: LinkDetailsResolvers<ContextType>;
+  List?: ListResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
 }>;
 

@@ -74,7 +74,7 @@ const isekaiComicSeriesUuids = [
   "13e52f7e-8a2b-4425-b760-4feb87153736", // The Bookworm
   "0ea33c3f-582e-4280-a589-ec371486ce21", // D-Link
   "1d6bf248-a4e7-4f2b-a585-a8a747038c50", // City Of Souls
-  "6f9568a2-3a7d-4d75-a021-48735eaf9116" // Eternal Reverie: 2000-year Odyssey
+  "6f9568a2-3a7d-4d75-a021-48735eaf9116", // Eternal Reverie: 2000-year Odyssey
 ]
 
 const spookyToonsComicSeriesUuids = [
@@ -143,7 +143,7 @@ const monsterLoversComicSeriesUuids = [
   "bbada132-2508-47fb-937a-22fbe12708be" // Pirates of the Hard Nox
 ]
 
-export const featuredComicSeriesUuids = [
+const featuredComicSeriesUuidsSet = new Set([
   ...mostPopularComicSeriesUuids,
   ...friendsToLoversComicSeriesUuids,
   ...enemiesToLoversComicSeriesUuids,
@@ -154,13 +154,15 @@ export const featuredComicSeriesUuids = [
   ...spicyComicSeriesUuids,
   ...LGBTComicSeriesUuids,
   ...monsterLoversComicSeriesUuids,
-]
+])
+
+export const featuredComicSeriesUuids = Array.from(featuredComicSeriesUuidsSet);
 
 export const curatedListsData: { [key: string]: ListModel } = {
   "1": {
     id: "1",
     name: 'Most Recommended',
-    description: "Here's a list of the most recommended Webtoons on Inkverse!",
+    description: "We've curated a list of the most recommended Webtoons on Inkverse! From gripping storylines to stunning artwork, these series were recommended the most by our community.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/most-recommended.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -170,7 +172,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "2": {
     id: "2",
     name: 'Friends to Lovers',
-    description: "Here's a list of great friends to lovers Webtoons on Inkverse!",
+    description: "Heartwarming stories where friendship blossoms into romance! These Webtoons showcase the beautiful journey of characters who find love in their closest companions.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/friends-to-lovers.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -180,7 +182,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "3": {
     id: "3",
     name: 'Enemies to Lovers',
-    description: "Here's a list of awesome enemies to lovers Webtoons on Inkverse!",
+    description: "Fierce rivals and sworn enemies discover that there can be a thin line between love and hate.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/enemies-to-lovers.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -190,7 +192,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "4": {
     id: "4",
     name: 'Female Leads',
-    description: "Here's a list of FL (female leads) Webtoons on Inkverse!",
+    description: "Dive into these compelling stories featuring strong female protagonists! From action-packed adventures to slice-of-life tales, these heroines will captivate you with their strength and determination.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/female-leads.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -200,7 +202,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "5": {
     id: "5",
     name: 'Sent to Another World',
-    description: "Here's a list of Sent to Another World Webtoons on Inkverse!",
+    description: "Join in on extraordinary adventures and be transported to another world. Follow our protagonists as they navigate magical realms, face unexpected challenges, and discover their true potential in a fantastical new dimension.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/sent-to-another-world.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -210,7 +212,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "6": {
     id: "6",
     name: 'Spooky Toons',
-    description: "Here's a list of Spooky Toons on Inkverse!",
+    description: "From supernatural mysteries to gothic horror, these series will keep you on the edge of your seat.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/spooky-toons.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -220,7 +222,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "7": {
     id: "7",
     name: 'Wholesome Comics',
-    description: "Here's a list of Wholesome Comfort Comics Webtoons on Inkverse!",
+    description: "Find your happy place with these heartwarming and uplifting Webtoons. These series offer sweet moments, genuine connections, and stories that will leave you with a smile.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/comfort-comics.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -230,7 +232,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "8": {
     id: "8",
     name: 'Spicy',
-    description: "Here's a list of Spicy Webtoons on Inkverse!",
+    description: "From steamy romances to dramatic encounters, these series will keep you coming back for more.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/spicy.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -240,7 +242,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "9": {
     id: "9",
     name: 'LGBT',
-    description: "Here's a list of LGBT Webtoons on Inkverse!",
+    description: "These stories portray various identities that is meant to resonate with readers from all walks of life.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/lgbt.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -250,8 +252,8 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "10": {
     id: "10",
     name: 'Monster Lovers',
-    description: "Here's a list of Monster Lovers Webtoons on Inkverse!",
-    bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/monster-lovers.webp',
+    description: "From gentle giants to misunderstood creatures, these series prove that beauty comes in all forms.",
+    bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/moster-lovers.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
     userId: 2,

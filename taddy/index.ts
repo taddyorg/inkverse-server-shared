@@ -25,8 +25,8 @@ export async function taddyGraphqlRequest(query: string, variables: any): Promis
 }
 
 const SEARCH_FOR_TERM_QUERY = gql`
-  query searchForTerm($term: String, $page: Int, $limitPerPage: Int, $filterForTypes: [TaddyType], $filterForCountries: [Country], $filterForLanguages: [Language], $filterForGenres: [Genre], $filterForTags: [String], $filterForSeriesUuids: [ID], $filterForNotInSeriesUuids: [ID], $isExactPhraseSearchMode: Boolean, $isSafeMode: Boolean, $searchResultsBoostType: SearchResultBoostType) {
-    searchForTerm(term: $term, page: $page, limitPerPage: $limitPerPage, filterForTypes: $filterForTypes, filterForCountries: $filterForCountries, filterForLanguages: $filterForLanguages, filterForGenres: $filterForGenres, filterForTags: $filterForTags, filterForSeriesUuids: $filterForSeriesUuids, filterForNotInSeriesUuids: $filterForNotInSeriesUuids, isExactPhraseSearchMode: $isExactPhraseSearchMode, isSafeMode: $isSafeMode, searchResultsBoostType:$searchResultsBoostType) {
+  query searchForTerm($term: String, $page: Int, $limitPerPage: Int, $filterForTypes: [TaddyType]) {
+    searchForTerm(term: $term, page: $page, limitPerPage: $limitPerPage, filterForTypes: $filterForTypes) {
       searchId
       comicSeries {
         uuid
@@ -188,5 +188,6 @@ export {
   GET_COMICISSUE_QUERY,
   GET_CREATOR_QUERY,
   GET_CREATOR_WITH_CONTENT_QUERY,
-  GET_CREATORCONTENT_QUERY
+  GET_CREATORCONTENT_QUERY,
+  SEARCH_FOR_TERM_QUERY
 }

@@ -68,6 +68,24 @@ export class CreatorContent {
       .returning('*');
   }
 
+  static async getContentForCreatorAndType(
+    creatorUuid: string,
+    contentType: TaddyType,
+    sortOrder: SortOrder | undefined = SortOrder.LATEST,
+    offset: number | undefined = 0,
+    limit: number | undefined = 10
+  ): Promise<CreatorContentModel[]> {
+    return await database('creatorcontent')
+      .where({
+        creatorUuid,
+        contentType,
+      })
+      .orderByRaw('position ' + sortOrderToSQLOrderBy(sortOrder) + ' NULLS LAST')
+      .offset(offset)
+      .limit(limit)
+      .returning('*');
+  }
+
   static async addOrUpdateCreatorContent(data: Record<string, any>): Promise<CreatorContentModel | null> {
     const creatorcontentdata = getCreatorContentDetails(data);
     const [creatorcontent] = await database("creatorcontent")

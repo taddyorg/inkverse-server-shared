@@ -162,7 +162,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "1": {
     id: "1",
     name: 'Most Recommended',
-    description: "We've curated a list of the most recommended Webtoons on Inkverse! From gripping storylines to stunning artwork, these series were recommended the most by our community.",
+    description: "Here is a list of the most recommended comics on Inkverse.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/most-recommended.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,
@@ -202,7 +202,7 @@ export const curatedListsData: { [key: string]: ListModel } = {
   "5": {
     id: "5",
     name: 'Sent to Another World',
-    description: "Join in on extraordinary adventures and be transported to another world. Follow our protagonists as they navigate magical realms, face unexpected challenges, and discover their true potential in a fantastical new dimension.",
+    description: "Join in on extraordinary adventures and be transported to another world. Follow the protagonists as they navigate magical realms, face unexpected challenges, and discover their true potential in a fantastical new dimension.",
     bannerImageUrl: 'https://ink0.inkverse.co/curated-lists/sent-to-another-world.webp',
     type: ListType.COMICSERIES,
     privacyType: PrivacyType.PUBLIC,

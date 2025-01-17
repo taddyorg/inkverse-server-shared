@@ -977,6 +977,7 @@ export type QueryGetRecentlyUpdatedComicSeriesArgs = {
 
 
 export type QuerySearchForTermArgs = {
+  filterForTypes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   limitPerPage?: InputMaybe<Scalars['Int']['input']>;
   page?: InputMaybe<Scalars['Int']['input']>;
   term?: InputMaybe<Scalars['String']['input']>;

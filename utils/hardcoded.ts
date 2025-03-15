@@ -91,6 +91,7 @@ const spookyToonsComicSeriesUuids = [
   "299eaa21-9c3a-4dbe-baf6-5c733420086f", // HiLo Spirits
   "15e7f2d2-2f3d-4750-94b3-ce8c418d66be", // I’m Mortal
   "6f59d535-159d-47f2-9ce3-75000f296448", // Team Diamant Presents : Happy Go Gothy
+  "9966e4e4-cb0d-412d-b682-ebc8a7ab3ce5", // Supercat
 ]
 
 const wholesomeComicSeriesUuids = [

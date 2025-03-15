@@ -1,4 +1,5 @@
 import { GraphQLClient, gql } from 'graphql-request';
+import { get } from 'lodash-es';
 
 export async function taddyGraphqlRequest(query: string, variables: any): Promise<Record<string, any> | undefined> {
   const endpointUrl = "https://api.taddy.org/";
@@ -17,6 +18,10 @@ export async function taddyGraphqlRequest(query: string, variables: any): Promis
   try {
     const client = new GraphQLClient(endpointUrl, { headers })
     const data = await client.request(query, variables)
+    
+    // const comicSeries = get(data, 'search.comicSeries', []);
+    // console.log('comicSeries.length', comicSeries?.length || 0);
+    
     return data as Record<string, any>;
   }catch(e) {
     console.log("inside sentTaddyGraphqlRequest", query, variables, e)
@@ -25,7 +30,7 @@ export async function taddyGraphqlRequest(query: string, variables: any): Promis
 }
 
 const SEARCH_QUERY = gql`
-  query search($term: String, $page: Int, $limitPerPage: Int, $filterForTypes: [SearchContentType], $filterForTags: [String], $filterForGenres: [String]) {
+  query search($term: String, $page: Int, $limitPerPage: Int, $filterForTypes: [SearchContentType], $filterForTags: [String], $filterForGenres: [Genre]) {
     search(term: $term, page: $page, limitPerPage: $limitPerPage, filterForTypes: $filterForTypes, filterForTags: $filterForTags, filterForGenres: $filterForGenres) {
       searchId
       comicSeries {

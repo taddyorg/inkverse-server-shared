@@ -13,7 +13,7 @@ import { safeStringValue, safeObjWithVariantKeys, safeArrayProperties, prettyEnc
 import { UUIDLookup } from "./index.js";
 import { setSimpleCache } from "../utils/simplecache.js";
 import { getSimpleCache } from "../utils/simplecache.js";
-import { arrayToObject } from "@/public/utils.js";
+import { arrayToObject } from "../../public/utils.js";
 
 type ComicSeriesInput = Omit<ComicSeriesModel, 'id' | 'uuid' | 'createdAt' | 'updatedAt'>;
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { GraphQLClient, gql } from 'graphql-request';
-import { getInkverseUrl, InkverseUrlType } from "../../public/utils.js";
+import { getInkverseUrl } from "../../public/utils.js";
 
 export enum CacheType {
   EVERYTHING = 'everything',
@@ -276,8 +276,11 @@ function getCloudflareDataObject(type: CacheType, id?:string, shortUrl?:string) 
     case CacheType.DOCUMENTATION:
       return { purge_everything: true }
     case CacheType.COMICSERIES:
+      return { files: [getInkverseUrl({ type: 'comicseries', shortUrl })] }
+    case CacheType.COMICISSUE:
+      return { files: [getInkverseUrl({ type: 'comicissue', shortUrl })] }
     case CacheType.CREATOR:
-      return { files: [getInkverseUrl({ type: InkverseUrlType.CREATOR, shortUrl })] }
+      return { files: [getInkverseUrl({ type: 'creator', shortUrl })] }
     case CacheType.SITEMAP:
       return { files: [`https://ink0.inkverse.co/sitemap/${id}`] }
     default:

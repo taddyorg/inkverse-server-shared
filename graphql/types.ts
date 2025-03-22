@@ -120,6 +120,8 @@ export type ComicSeries = {
   sssOwnerPublicEmail?: Maybe<Scalars['String']['output']>;
   /**  Url for the comic series' SSS feed  */
   sssUrl?: Maybe<Scalars['String']['output']>;
+  /**  The status of the comic series  */
+  status?: Maybe<SeriesStatus>;
   /**  Tags for the comic series  */
   tags?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /**  Stringified JSON details for the thumbnail art. Convert to JSON to use.  */
@@ -850,6 +852,18 @@ export enum ListType {
   CREATORS = 'CREATORS'
 }
 
+export type Mutation = {
+  __typename?: 'Mutation';
+  /**  Report a comic series  */
+  reportComicSeries?: Maybe<Scalars['Boolean']['output']>;
+};
+
+
+export type MutationReportComicSeriesArgs = {
+  reportType?: InputMaybe<Scalars['String']['input']>;
+  uuid: Scalars['ID']['input'];
+};
+
 /**  The privacy types for a list  */
 export enum PrivacyType {
   /**  The list is private  */
@@ -1117,6 +1131,7 @@ export type ResolversTypes = ResolversObject<{
   LinkType: LinkType;
   List: ResolverTypeWrapper<ListModel>;
   ListType: ListType;
+  Mutation: ResolverTypeWrapper<{}>;
   PrivacyType: PrivacyType;
   Query: ResolverTypeWrapper<{}>;
   SearchResults: ResolverTypeWrapper<Omit<SearchResults, 'comicSeries' | 'creators'> & { comicSeries?: Maybe<Array<Maybe<ResolversTypes['ComicSeries']>>>, creators?: Maybe<Array<Maybe<ResolversTypes['Creator']>>> }>;
@@ -1143,6 +1158,7 @@ export type ResolversParentTypes = ResolversObject<{
   Int: Scalars['Int']['output'];
   LinkDetails: LinkDetails;
   List: ListModel;
+  Mutation: {};
   Query: {};
   SearchResults: Omit<SearchResults, 'comicSeries' | 'creators'> & { comicSeries?: Maybe<Array<Maybe<ResolversParentTypes['ComicSeries']>>>, creators?: Maybe<Array<Maybe<ResolversParentTypes['Creator']>>> };
   String: Scalars['String']['output'];
@@ -1202,6 +1218,7 @@ export type ComicSeriesResolvers<ContextType = any, ParentType extends Resolvers
   sssOwnerName?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   sssOwnerPublicEmail?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   sssUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<Maybe<ResolversTypes['SeriesStatus']>, ParentType, ContextType>;
   tags?: Resolver<Maybe<Array<Maybe<ResolversTypes['String']>>>, ParentType, ContextType>;
   thumbnailImageAsString?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   uuid?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -1306,6 +1323,10 @@ export type ListResolvers<ContextType = any, ParentType extends ResolversParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
+export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  reportComicSeries?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<MutationReportComicSeriesArgs, 'uuid'>>;
+}>;
+
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   getComicIssue?: Resolver<Maybe<ResolversTypes['ComicIssue']>, ParentType, ContextType, RequireFields<QueryGetComicIssueArgs, 'seriesUuid' | 'uuid'>>;
   getComicSeries?: Resolver<Maybe<ResolversTypes['ComicSeries']>, ParentType, ContextType, Partial<QueryGetComicSeriesArgs>>;
@@ -1344,6 +1365,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   HomeScreenCuratedList?: HomeScreenCuratedListResolvers<ContextType>;
   LinkDetails?: LinkDetailsResolvers<ContextType>;
   List?: ListResolvers<ContextType>;
+  Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   SearchResults?: SearchResultsResolvers<ContextType>;
 }>;

@@ -1,9 +1,6 @@
 import axios, { type AxiosRequestConfig } from "axios";
 
-enum SlackWebhookChannel {
-  SIGNUP = "signup",
-  GENERAL = "general",
-}
+type SlackWebhookChannel = 'signup' | 'general';
 
 const SLACK_WEBHOOKS = JSON.parse(process.env.SLACK_WEBHOOKS || '{}');
 

@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<void> {
     table.bigIncrements('id', { primaryKey: false });
     table.uuid('uuid').primary();
     table.json('oauth')
-    table.timestamp('date_published');
+    table.bigInteger('date_published');
     table.index(['id']);
   });
 }

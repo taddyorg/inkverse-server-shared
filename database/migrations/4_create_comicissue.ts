@@ -20,7 +20,7 @@ export async function up(knex: Knex): Promise<void> {
       table.integer('position');
       table.text('push_notification_message');
       table.specificType('scopes_for_exclusive_content', 'varchar(255)[]');
-      table.timestamp('date_exclusive_content_is_available');
+      table.bigInteger('date_exclusive_content_is_available');
       table.index(['id']);
       table.index(['series_uuid']);
       table.index(['series_uuid', 'date_published']);

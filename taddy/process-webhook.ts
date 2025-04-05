@@ -1,5 +1,5 @@
 import { ComicSeries, ComicIssue, Creator, CreatorContent } from '../models/index.js';
-import { CacheType, purgeCacheOnCdn, purgeMultipleOnCdn } from '../cache/index.js'
+import { purgeCacheOnCdn, purgeMultipleCacheOnCdn } from '../cache/index.js'
 import { getMultipleHeightAndWidths } from '../utils/sharp.js';
 
 export type TaddyWebhook = {
@@ -10,46 +10,43 @@ export type TaddyWebhook = {
   data: Record<string, any>;
 }
 
-export enum TaddyWebhookType {
-  COMICSERIES = "comicseries",
-  COMICISSUE = "comicissue",
-  CREATOR = "creator",
-  CREATORCONTENT = "creatorcontent",
-}
+export type TaddyWebhookType = 
+  'comicseries' |
+  'comicissue' |
+  'creator' |
+  'creatorcontent'
 
-export enum TaddyWebhookAction {
-  CREATED = "created",
-  UPDATED = "updated",
-  DELETED = "deleted",
-}
+export type TaddyWebhookAction =
+  'created' |
+  'updated' |
+  'deleted'
 
-export enum TaddyWebhookValidEvents {
-  COMICSERIES_CREATED = 'comicseries.created',
-  COMICSERIES_UPDATED = 'comicseries.updated',
-  COMICSERIES_DELETED = 'comicseries.deleted',
-  COMICSERIES_NEW_ISSUES_RELEASED = 'comicseries.new_issues_released',
-  COMICISSUE_CREATED = 'comicissue.created',
-  COMICISSUE_UPDATED = 'comicissue.updated',
-  COMICISSUE_DELETED = 'comicissue.deleted',
-  CREATOR_CREATED = 'creator.created',
-  CREATOR_UPDATED = 'creator.updated',
-  CREATOR_DELETED = 'creator.deleted',
-  CREATOR_NEW_CONTENT_RELEASED = 'creator.new_content_released',
-  CREATORCONTENT_CREATED = 'creatorcontent.created',
-  CREATORCONTENT_UPDATED = 'creatorcontent.updated',
-  CREATORCONTENT_DELETED = 'creatorcontent.deleted',
-}
+export type TaddyWebhookValidEvents =
+  'comicseries.created' |
+  'comicseries.updated' |
+  'comicseries.deleted' |
+  'comicseries.new_issues_released' |
+  'comicissue.created' |
+  'comicissue.updated' |
+  'comicissue.deleted' |
+  'creator.created' |
+  'creator.updated' |
+  'creator.deleted' |
+  'creator.new_content_released' |
+  'creatorcontent.created' |
+  'creatorcontent.updated' |
+  'creatorcontent.deleted'
 
 export async function processWebhook(body: TaddyWebhook): Promise<void> {
   const { taddyType } = body;
   switch (taddyType) {
-    case TaddyWebhookType.COMICSERIES:
+    case 'comicseries':
       return await processComicSeriesWebhook(body);
-    case TaddyWebhookType.COMICISSUE:
+    case 'comicissue':
       return await processComicIssueWebhook(body);
-    case TaddyWebhookType.CREATOR:
+    case 'creator':
       return await processCreatorWebhook(body);
-    case TaddyWebhookType.CREATORCONTENT:
+    case 'creatorcontent':
       return await processCreatorContentWebhook(body);
     default:
       throw new Error(`processWebhook - Invalid taddyType: ${taddyType}`);
@@ -59,7 +56,7 @@ export async function processWebhook(body: TaddyWebhook): Promise<void> {
 async function processComicSeriesWebhook(body: TaddyWebhook): Promise<void> {
   const { taddyType, action, data } = body;
   switch (action) {
-    case TaddyWebhookAction.CREATED: {
+    case 'created': {
       const comicseries = await ComicSeries.addComicSeries(data);
 
       if (!comicseries) {
@@ -67,23 +64,23 @@ async function processComicSeriesWebhook(body: TaddyWebhook): Promise<void> {
       }
 
       await Promise.allSettled([
-        purgeCacheOnCdn(CacheType.COMICSERIES, comicseries.uuid, comicseries.shortUrl),
-        // purgeCacheOnCdn({ type: 'recentlyAdded', id: comicseries.uuid, passedInArgs: { page: 1, limitPerPage: 10 } }),
+        purgeCacheOnCdn({ type: 'comicseries', id: comicseries.uuid, shortUrl: comicseries.shortUrl }),
+        purgeCacheOnCdn({ type: 'recentlyAdded', id: 'recently-added' }),
       ])
       return;
     }
-    case TaddyWebhookAction.UPDATED: {
+    case 'updated': {
       const comicseries = await ComicSeries.updateComicSeries(data);  
 
       if (!comicseries) {
         throw new Error('processComicSeriesWebhook - updated - comicseries not found', data.uuid);
       }
       
-      await purgeCacheOnCdn(CacheType.COMICSERIES, comicseries.uuid, comicseries.shortUrl)
+      await purgeCacheOnCdn({ type: 'comicseries', id: comicseries.uuid, shortUrl: comicseries.shortUrl })
 
       return;
     }
-    case TaddyWebhookAction.DELETED: {
+    case 'deleted': {
       const deletedComicSeries = await ComicSeries.deleteComicSeries(data);
 
       if (!deletedComicSeries) {
@@ -93,9 +90,9 @@ async function processComicSeriesWebhook(body: TaddyWebhook): Promise<void> {
       const { uuid, issueUuids, storyUuids, shortUrl } = deletedComicSeries;
 
       await Promise.allSettled([
-        purgeCacheOnCdn(CacheType.COMICSERIES, uuid, shortUrl),
-        issueUuids ? purgeMultipleOnCdn(CacheType.COMICISSUE, issueUuids) : [],
-        storyUuids ? purgeMultipleOnCdn(CacheType.COMICSTORY, storyUuids) : [],
+        purgeCacheOnCdn({ type: 'comicseries', id: uuid, shortUrl }),
+        issueUuids ? purgeMultipleCacheOnCdn({ type: 'comicissue', ids: issueUuids }) : [],
+        storyUuids ? purgeMultipleCacheOnCdn({ type: 'comicstory', ids: storyUuids }) : [],
       ])
 
       return;
@@ -108,7 +105,7 @@ async function processComicSeriesWebhook(body: TaddyWebhook): Promise<void> {
 async function processComicIssueWebhook(body: TaddyWebhook) {
   const { taddyType, action, data } = body;
   switch (action) {
-    case TaddyWebhookAction.CREATED: {
+    case 'created': {
       const [comicissue, comicstories] = await ComicIssue.addComicIssue(data);
 
       if (!comicissue) {
@@ -130,10 +127,10 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
 
       // purge cache
       await Promise.allSettled([
-        comicseries ? purgeCacheOnCdn(CacheType.COMICSERIES, comicseries.uuid, comicseries.shortUrl) : [],
-        purgeCacheOnCdn(CacheType.COMICISSUE, comicissue.uuid),
-        comicstories.length > 0 ? purgeMultipleOnCdn(CacheType.COMICSTORY, comicstories.map(story => story.uuid)) : [],
-        // purgeCacheOnCdn({ type: 'recentlyUpdated', id: comicseries.uuid, passedInArgs: { page: 1, limitPerPage: 10 } }),
+        comicseries ? purgeCacheOnCdn({ type: 'comicseries', id: comicseries.uuid, shortUrl: comicseries.shortUrl }) : [],
+        purgeCacheOnCdn({ type: 'comicissue', id: comicissue.uuid }),
+        comicstories.length > 0 ? purgeMultipleCacheOnCdn({ type: 'comicstory', ids: comicstories.map(story => story.uuid) }) : [],
+        purgeCacheOnCdn({ type: 'recentlyUpdated', id: 'recently-updated' }),
       ])
 
       // push notification
@@ -141,7 +138,7 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
 
       return;
     }
-    case TaddyWebhookAction.UPDATED: {
+    case 'updated': {
       const [comicissue, comicstories] = await ComicIssue.updateComicIssue(data);
       
       if (!comicissue) {
@@ -162,14 +159,14 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
       }
       
       await Promise.allSettled([
-        comicseries ? purgeCacheOnCdn(CacheType.COMICSERIES, comicseries.uuid, comicseries.shortUrl) : [],
-        purgeCacheOnCdn(CacheType.COMICISSUE, comicissue.uuid),
-        comicstories.length > 0 ? purgeMultipleOnCdn(CacheType.COMICSTORY, comicstories.map(story => story.uuid)) : [],
+        comicseries ? purgeCacheOnCdn({ type: 'comicseries', id: comicseries.uuid, shortUrl: comicseries.shortUrl }) : [],
+        purgeCacheOnCdn({ type: 'comicissue', id: comicissue.uuid }),
+        comicstories.length > 0 ? purgeMultipleCacheOnCdn({ type: 'comicstory', ids: comicstories.map(story => story.uuid) }) : [],
       ])
 
       return;
     }
-    case TaddyWebhookAction.DELETED: {
+    case 'deleted': {
       const deletedComicIssue = await ComicIssue.deleteComicIssue(data);
 
       if (!deletedComicIssue) {
@@ -185,9 +182,9 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
       }
 
       await Promise.allSettled([
-        comicseries ? purgeCacheOnCdn(CacheType.COMICSERIES, comicseries.uuid, comicseries.shortUrl) : [],
-        purgeCacheOnCdn(CacheType.COMICISSUE, uuid),
-        storyUuids ? purgeMultipleOnCdn(CacheType.COMICSTORY, storyUuids) : [],
+        comicseries ? purgeCacheOnCdn({ type: 'comicseries', id: comicseries.uuid, shortUrl: comicseries.shortUrl }) : [],
+        purgeCacheOnCdn({ type: 'comicissue', id: uuid }),
+        storyUuids ? purgeMultipleCacheOnCdn({ type: 'comicstory', ids: storyUuids }) : [],
       ])
       return;
     }
@@ -199,27 +196,27 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
 async function processCreatorWebhook(body: TaddyWebhook): Promise<void> {
   const { taddyType, action, data } = body;
   switch (action) {
-    case TaddyWebhookAction.CREATED: {
+    case 'created': {
       const creator = await Creator.addCreator(data);
 
       if (!creator) {
         throw new Error('processCreatorWebhook - created - creator not found', data.uuid);
       }
 
-      await purgeCacheOnCdn(CacheType.CREATOR, creator.uuid)
+      await purgeCacheOnCdn({ type: 'creator', id: creator.uuid })
       return;
     }
-    case TaddyWebhookAction.UPDATED: {
+    case 'updated': {
       const creator = await Creator.updateCreator(data);
 
       if (!creator) {
         throw new Error('processCreatorWebhook - updated - creator not found', data.uuid);
       }
 
-      await purgeCacheOnCdn(CacheType.CREATOR, creator.uuid)
+      await purgeCacheOnCdn({ type: 'creator', id: creator.uuid })
       return;
     }
-    case TaddyWebhookAction.DELETED: {
+    case 'deleted': {
       const deletedCreator = await Creator.deleteCreator(data);
 
       if (!deletedCreator) {
@@ -229,8 +226,8 @@ async function processCreatorWebhook(body: TaddyWebhook): Promise<void> {
       const { uuid, contentUuids, shortUrl } = deletedCreator;
 
       await Promise.allSettled([
-        purgeCacheOnCdn(CacheType.CREATOR, uuid, shortUrl),
-        contentUuids ? purgeMultipleOnCdn(CacheType.CREATOR_CONTENT, contentUuids) : [],
+        purgeCacheOnCdn({ type: 'creator', id: uuid, shortUrl }),
+        contentUuids ? purgeMultipleCacheOnCdn({ type: 'creatorcontent', ids: contentUuids }) : [],
       ])
       return;
     }
@@ -242,7 +239,7 @@ async function processCreatorWebhook(body: TaddyWebhook): Promise<void> {
 async function processCreatorContentWebhook(body: TaddyWebhook): Promise<void> {
   const { taddyType, action, data } = body;
   switch (action) {
-    case TaddyWebhookAction.CREATED: {
+    case 'created': {
       const creatorcontent = await CreatorContent.addOrUpdateCreatorContent(data);
 
       if (!creatorcontent) {
@@ -256,8 +253,8 @@ async function processCreatorContentWebhook(body: TaddyWebhook): Promise<void> {
       }
 
       await Promise.allSettled([
-        creator ? purgeCacheOnCdn(CacheType.CREATOR, creator.uuid, creator.shortUrl) : [],
-        purgeCacheOnCdn(CacheType.CREATOR_CONTENT, creatorcontent.uuid),
+        creator ? purgeCacheOnCdn({ type: 'creator', id: creator.uuid, shortUrl: creator.shortUrl }) : [],
+        purgeCacheOnCdn({ type: 'creatorcontent', id: creatorcontent.uuid }),
       ])
       
       // push notification
@@ -265,7 +262,7 @@ async function processCreatorContentWebhook(body: TaddyWebhook): Promise<void> {
 
       return;
     }
-    case TaddyWebhookAction.UPDATED: {
+    case 'updated': {
       const creatorcontent = await CreatorContent.addOrUpdateCreatorContent(data);
 
       if (!creatorcontent) {
@@ -279,12 +276,12 @@ async function processCreatorContentWebhook(body: TaddyWebhook): Promise<void> {
       }
 
       await Promise.allSettled([
-        creator ? purgeCacheOnCdn(CacheType.CREATOR, creator.uuid, creator.shortUrl) : [],
-        purgeCacheOnCdn(CacheType.CREATOR_CONTENT, creatorcontent.uuid),
+        creator ? purgeCacheOnCdn({ type: 'creator', id: creator.uuid, shortUrl: creator.shortUrl }) : [],
+        purgeCacheOnCdn({ type: 'creatorcontent', id: creatorcontent.uuid }),
       ])
       return;
     }
-    case TaddyWebhookAction.DELETED: {
+    case 'deleted': {
       const deletedCreatorContent = await CreatorContent.deleteCreatorContent(data);
 
       if (!deletedCreatorContent) {
@@ -298,8 +295,8 @@ async function processCreatorContentWebhook(body: TaddyWebhook): Promise<void> {
       }
 
       await Promise.allSettled([
-        creator ? purgeCacheOnCdn(CacheType.CREATOR, creator.uuid, creator.shortUrl) : [],
-        deletedCreatorContent ? purgeCacheOnCdn(CacheType.CREATOR_CONTENT, deletedCreatorContent.uuid) : [],
+        creator ? purgeCacheOnCdn({ type: 'creator', id: creator.uuid, shortUrl: creator.shortUrl }) : [],
+        deletedCreatorContent ? purgeCacheOnCdn({ type: 'creatorcontent', id: deletedCreatorContent.uuid }) : [],
       ])
       return;
     }

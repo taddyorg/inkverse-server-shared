@@ -1,53 +1,72 @@
 import axios from "axios";
 import { GraphQLClient, gql } from 'graphql-request';
-import { getInkverseUrl } from "../../public/utils.js";
+import { getInkverseUrl, inkverseWebsiteUrl } from "../../public/utils.js";
 
-export enum CacheType {
-  EVERYTHING = 'everything',
-  DOCUMENTATION = 'documentation',
-  SITEMAP = 'sitemap',
-  COMICSERIES = 'comicseries',
-  COMICISSUE = 'comicissue',
-  COMICSTORY = 'comicstory',
-  CREATOR = 'creator',
-  CREATOR_CONTENT = 'creatorcontent',
+type CacheType = 
+  'everything' |
+  'documentation' |
+  'sitemap' |
+  'comicseries' |
+  'comicissue' |
+  'comicstory' |
+  'creator' |
+  'creatorcontent' |
+  'recentlyAdded' |
+  'recentlyUpdated'
+
+interface PurgeCacheParams {
+  type: CacheType;
+  id?: string;
+  ids?: string[];
+  shortUrl?: string;
+  name?: string;
 }
 
-export async function purgeCacheOnCdn(type: CacheType, id?:string, shortUrl?:string) {
+export async function purgeCacheOnCdn({ type, id, shortUrl, name }: PurgeCacheParams) {
   if (process.env.NODE_ENV !== "production") {
-    console.log('LocalHost purgeCacheOnCdn', type, id);
+    console.log('LocalHost purgeCacheOnCdn', type, id, shortUrl, name);
   }
 
   switch (type) {
-    case CacheType.EVERYTHING:
-    case CacheType.DOCUMENTATION:
-    case CacheType.COMICSERIES:
-    case CacheType.COMICISSUE:
-    case CacheType.COMICSTORY:
-    case CacheType.CREATOR:
-    case CacheType.CREATOR_CONTENT:
-    case CacheType.SITEMAP:
-      return await purgeEvent(type, id, shortUrl)
+    case 'everything':
+    case 'documentation':
+    case 'comicseries':
+    case 'creator':
+    case 'recentlyAdded':
+    case 'recentlyUpdated':
+      if (!id) { throw new Error('purgeCacheOnCdn - id is required for type: ' + type); }
+
+      await purgeApiCache(type, id)
+      await purgeWebsiteCache(type, id, shortUrl, name)
+      return
+    case 'comicissue':
+    case 'comicstory':
+    case 'creatorcontent':
+      if (!id) { throw new Error('purgeCacheOnCdn - id is required for type: ' + type); }
+
+      return await purgeApiCache(type, id)
+    case 'sitemap':
+      return await purgeWebsiteCache(type, id, shortUrl, name)
     default:
-      throw new Error(`inside purgeCacheOnCdn() - Dont have logic for type: ${type}`)
+      throw new Error(`inside purgeEvent() - Dont have logic for type: ${type}`)
   }
 }
 
-async function purgeEvent(type: CacheType, id?:string, shortUrl?:string) {
+export async function purgeMultipleCacheOnCdn({ type, ids }: PurgeCacheParams) {
+  if (process.env.NODE_ENV !== "production") {
+    console.log('LocalHost purgeMultipleCacheOnCdn', type, ids);
+  }
+
   switch (type) {
-    case CacheType.EVERYTHING:
-    case CacheType.DOCUMENTATION:
-    case CacheType.COMICSERIES:
-    case CacheType.CREATOR:
-      await purgeApiCache(type, id)
-      await purgeWebsiteCache(type, id, shortUrl)
+    case 'comicissue':
+    case 'comicstory':
+    case 'creatorcontent':
+    case 'recentlyAdded':
+    case 'recentlyUpdated':
+      if (!ids) { throw new Error('purgeMultipleCacheOnCdn - ids is required for type: ' + type); }
+
+      await purgeMultipleOnCdn(type, ids)
       return
-    case CacheType.COMICISSUE:
-    case CacheType.COMICSTORY:
-    case CacheType.CREATOR_CONTENT:
-      return await purgeApiCache(type, id)
-    case CacheType.SITEMAP:
-      return await purgeWebsiteCache(type, id, shortUrl)
     default:
       throw new Error(`inside purgeEvent() - Dont have logic for type: ${type}`)
   }
@@ -55,143 +74,55 @@ async function purgeEvent(type: CacheType, id?:string, shortUrl?:string) {
 
 function getGraphCDNQuery(type: CacheType) {
   switch (type) {
-    case CacheType.EVERYTHING:
+    case 'everything':
       return `
         mutation {
           _purgeAll
         }
       `
-    case CacheType.DOCUMENTATION:
+    case 'documentation':
       return `
         mutation {
           _purgeQuery(queries: [getDocumenation])
         }
       `
-    case CacheType.COMICSERIES:
+    case 'comicseries':
       return `
         mutation ComicSeriesPurge ($uuid: [ID!]) {
           purgeComicSeries(uuid: $uuid)
         }
       `
-    case CacheType.COMICISSUE:
+    case 'comicissue':
       return `
         mutation ComicIssuePurge ($uuid: [ID!]) {
           purgeComicIssue(uuid: $uuid)
         }
       `
-    case CacheType.COMICSTORY:
+    case 'comicstory':
       return `
         mutation ComicStoryPurge ($uuid: [ID!]) {
           purgeComicStory(uuid: $uuid)
         }
       `
-    case CacheType.CREATOR:
+    case 'creator':
       return `
         mutation CreatorPurge ($uuid: [ID!]) {
           purgeCreator(uuid: $uuid)
         }
       `
-    case CacheType.CREATOR_CONTENT:
+    case 'creatorcontent':
       return `
-        mutation CreatorContentPurge ($mergedUuid: [ID!]) {
-          purgeCreatorContent(mergedUuid: $mergedUuid)
+        mutation CreatorContentPurge ($uuid: [ID!]) {
+          purgeCreatorContent(uuid: $uuid)
         }
       `
-    // case 'user':
-    //   return `
-    //     mutation UserPurge ($id: [ID!]) {
-    //       purgeUser(id: $id)
-    //     }
-    //   `
-    // case 'privateUser':
-    //   return `
-    //     mutation PrivateUserPurge ($id: [ID!]) {
-    //       purgePrivateUser(id: $id)
-    //     }
-    //   `
-    // case 'homescreenList':
-    //   return `
-    //     mutation HomeScreenListPurge ($id: [ID!]) {
-    //       purgeHomeScreenList(id: $id)
-    //     }
-    //   `
-    // case 'list':
-    //   return `
-    //       mutation ListPurge($id: [ID!]) {
-    //         purgeList(id: $id)
-    //       }`
-    // case 'getMyLists':
-    //   return `
-    //       mutation PurgeGetMyLists($userId: ID!) {
-    //         purgeQuery_getMyLists(
-    //           args: { userId: $userId }
-    //         )
-    //       }
-    //     `
-    // case 'getMyListsForItem':
-    //   return `
-    //       mutation PurgeGetMyListsForItem($userId: ID!, $uuid: ID!) {
-    //         purgeQuery_getMyListsForItem(
-    //           args: { userId: $userId, uuid: $uuid }
-    //         )
-    //       }
-    //     `
-    // case 'getUserById':
-    //   return `
-    //       mutation PurgeGetUserById($id: ID!) {
-    //         purgeQuery_getUserById(
-    //           args: { id: $id }
-    //         )
-    //       }
-    //     `
-    // case 'recentlyAdded':
-    //   return `
-    //     mutation PurgeGetRecentlyAddedComicSeries($page: _ArgumentsJSONObject, $limitPerPage: _ArgumentsJSONObject) {
-    //       purgeQuery_getRecentlyAddedComicSeries(
-    //         args: {page: $page, limitPerPage: $limitPerPage }
-    //       )
-    //     }
-    //   `
-    // case 'recentlyUpdated':
-    //   return `
-    //     mutation PurgeGetRecentlyUpdatedComicSeries($page: _ArgumentsJSONObject, $limitPerPage: _ArgumentsJSONObject) {
-    //       purgeQuery_getRecentlyUpdatedComicSeries(
-    //         args: {page: $page, limitPerPage: $limitPerPage }
-    //       )
-    //     }
-    //   `
-    // case 'comicseriesMiscDetails':
-    //   return `
-    //     mutation PurgeGetComicSeriesMiscDetails($contentUuid: ID, $contentType: String) {
-    //       purgeQuery_getComicSeriesMiscDetails(
-    //         args: {contentUuid: $contentUuid, contentType: $contentType}
-    //       )
-    //     }
-    //   `
-    // case `contentRecommendations`:
-    //   return `
-    //     mutation PurgeGetContentRecommendations($contentUuid: ID!, $contentType: String!, $limitPerPage: Int, $page: Int) {
-    //       purgeQuery_getContentRecommendations(
-    //         args: {contentUuid: $contentUuid, contentType: $contentType, limitPerPage: $limitPerPage, page: $page}
-    //       )
-    //     }
-    //   `
-    // case `userRecommendations`:
-    //   return `
-    //     mutation PurgeGetUserRecommendations($userId: ID!) {
-    //       purgeQuery_getUserRecommendations(
-    //         args: {userId: $userId, limitPerPage: $limitPerPage, page: $page}
-    //       )
-    //     }
-    //   `
-    // case `userContentRecommendations`:
-    //   return `
-    //     mutation PurgeGetUserContentRecommendations($contentUuid: ID!, $contentType: String!) {
-    //       purgeQuery_getUserContentRecommendations(
-    //         args: {contentUuid: $contentUuid, contentType: $contentType}
-    //       )
-    //     }
-    //   `
+    case 'recentlyAdded':
+    case 'recentlyUpdated':
+      return `
+        mutation HomeScreenComicSeriesPurge ($id: ID!) {
+          purgeHomeScreenComicSeries(id: $id)
+        }
+      `
     default:
       throw new Error(`inside getGraphCDNQuery() - Dont have logic for type: ${type}`)
   }
@@ -199,26 +130,25 @@ function getGraphCDNQuery(type: CacheType) {
 
 function getGraphCDNVariables(type: CacheType, id?:string, ids?:string[]) {
   switch (type) {
-    case CacheType.EVERYTHING:
-    case CacheType.DOCUMENTATION:
+    case 'everything':
+    case 'documentation':
       return null
-    case CacheType.COMICSERIES:
-    case CacheType.COMICISSUE:
-    case CacheType.COMICSTORY:
-    case CacheType.CREATOR:
-      return { uuid: ids || [id] }
-    case CacheType.CREATOR_CONTENT:
+    case 'comicseries':
+    case 'comicissue':
+    case 'comicstory':
+    case 'creator':
+    case 'creatorcontent':
+    case 'recentlyAdded':
+    case 'recentlyUpdated':
       return { uuid: ids || [id] }
     default:
       throw new Error(`inside getGraphCDNVariables() - Dont have logic for type: ${type}`)
   }
 }
 
-async function purgeApiCache(type: CacheType, id?:string) {
+async function purgeApiCache(type: CacheType, id:string) {
   try {
-    if (!id) {
-      throw new Error('purgeApiCache - id is required');
-    }else if (process.env.NODE_ENV !== "production") {
+    if (process.env.NODE_ENV !== "production") {
       console.log('LocalHost purgeApiCache', type, id);
       return;
     }
@@ -231,7 +161,7 @@ async function purgeApiCache(type: CacheType, id?:string) {
   }
 }
 
-export async function purgeMultipleOnCdn(type: CacheType, ids:string[]) {
+async function purgeMultipleOnCdn(type: CacheType, ids:string[]) {
   try {
     if (process.env.NODE_ENV !== "production") {
       console.log('LocalHost purgeMultipleOnCdn', type, ids);
@@ -246,10 +176,10 @@ export async function purgeMultipleOnCdn(type: CacheType, ids:string[]) {
   }
 }
 
-async function purgeWebsiteCache(type: CacheType, id?:string, shortUrl?:string) {
+async function purgeWebsiteCache(type: CacheType, id?:string, shortUrl?:string, name?:string) {
   try {
     if (process.env.NODE_ENV !== "production") {
-      console.log('LocalHost purgeWebsiteCache', type, id, shortUrl);
+      console.log('LocalHost purgeWebsiteCache', type, id, shortUrl, name);
       return;
     }
 
@@ -261,7 +191,7 @@ async function purgeWebsiteCache(type: CacheType, id?:string, shortUrl?:string) 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
       },
-      data: getCloudflareDataObject(type, id, shortUrl)
+      data: getCloudflareDataObject(type, id, shortUrl, name)
     };
 
     await axios(options);
@@ -270,19 +200,22 @@ async function purgeWebsiteCache(type: CacheType, id?:string, shortUrl?:string) 
   }
 }
 
-function getCloudflareDataObject(type: CacheType, id?:string, shortUrl?:string) {
+function getCloudflareDataObject(type: CacheType, id?:string, shortUrl?:string, name?:string) {
   switch (type) {
-    case CacheType.EVERYTHING:
-    case CacheType.DOCUMENTATION:
+    case 'everything':
+    case 'documentation':
       return { purge_everything: true }
-    case CacheType.COMICSERIES:
-      return { files: [getInkverseUrl({ type: 'comicseries', shortUrl })] }
-    case CacheType.COMICISSUE:
-      return { files: [getInkverseUrl({ type: 'comicissue', shortUrl })] }
-    case CacheType.CREATOR:
-      return { files: [getInkverseUrl({ type: 'creator', shortUrl })] }
-    case CacheType.SITEMAP:
+    case 'comicseries':
+      return { files: [`${inkverseWebsiteUrl}${getInkverseUrl({ type: 'comicseries', shortUrl })}`] }
+    case 'comicissue':
+      return { files: [`${inkverseWebsiteUrl}${getInkverseUrl({ type: 'comicissue', shortUrl, name, uuid: id })}`] }
+    case 'creator':
+      return { files: [`${inkverseWebsiteUrl}${getInkverseUrl({ type: 'creator', shortUrl })}`] }
+    case 'sitemap':
       return { files: [`https://ink0.inkverse.co/sitemap/${id}`] }
+    case 'recentlyAdded':
+    case 'recentlyUpdated':
+      return { files: [`${inkverseWebsiteUrl}/`] }
     default:
       throw new Error(`inside getCloudflareDataObject() - Dont have logic for type: ${type}`)
   }
@@ -295,7 +228,7 @@ async function postToGraphQL(query: string, variables: any) {
 
   const headers = {
     'Content-Type': 'application/json',
-    'stellate-token': process.env.GRAPHCDN_API_TOKEN
+    'stellate-token': process.env.STELLATE_API_TOKEN
   }
 
   const client = new GraphQLClient(endpointUrl, { headers })

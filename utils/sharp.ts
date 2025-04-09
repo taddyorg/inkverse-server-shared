@@ -56,8 +56,7 @@ async function getHeightAndWidth(comicstory?: ComicStoryModel): Promise<Partial<
 
     try {
         const { uuid, issueUuid, seriesUuid, storyImage } = comicstory;
-
-        const imageUrl = getStoryImageUrl({ storyImageAsString: JSON.stringify(storyImage) });
+        const imageUrl = getStoryImageUrl({ storyImageAsString: storyImage ? JSON.stringify(storyImage) : null });
 
         if (!imageUrl) { return null; }
 

@@ -2,7 +2,7 @@ import axios from "axios";
 import { GraphQLClient, gql } from 'graphql-request';
 import { getInkverseUrl, inkverseWebsiteUrl } from "../../public/utils.js";
 
-type CacheType = 
+export type CacheType = 
   'everything' |
   'documentation' |
   'sitemap' |
@@ -28,7 +28,6 @@ export async function purgeCacheOnCdn({ type, id, shortUrl, name }: PurgeCachePa
   }
 
   switch (type) {
-    case 'everything':
     case 'documentation':
     case 'comicseries':
     case 'creator':
@@ -39,6 +38,10 @@ export async function purgeCacheOnCdn({ type, id, shortUrl, name }: PurgeCachePa
       await purgeApiCache(type, id)
       await purgeWebsiteCache(type, id, shortUrl, name)
       return
+    case 'everything':
+      await purgeApiCache(type, "")
+      await purgeWebsiteCache(type)
+      return 
     case 'comicissue':
     case 'comicstory':
     case 'creatorcontent':
@@ -224,7 +227,7 @@ function getCloudflareDataObject(type: CacheType, id?:string, shortUrl?:string, 
 async function postToGraphQL(query: string, variables: any) {
   const queryRequest = gql`${query}`;
 
-  const endpointUrl = 'https://admin.stellate.co/inkverse'
+  const endpointUrl = 'https://admin.stellate.co/inkverse1'
 
   const headers = {
     'Content-Type': 'application/json',

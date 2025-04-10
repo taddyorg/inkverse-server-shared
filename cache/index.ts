@@ -215,7 +215,7 @@ function getCloudflareDataObject(type: CacheType, id?:string, shortUrl?:string, 
       return { files: [`https://ink0.inkverse.co/sitemap/${id}`] }
     case 'recentlyAdded':
     case 'recentlyUpdated':
-      return { files: [`${inkverseWebsiteUrl}/`] }
+      return { files: [`${inkverseWebsiteUrl}`] }
     default:
       throw new Error(`inside getCloudflareDataObject() - Dont have logic for type: ${type}`)
   }

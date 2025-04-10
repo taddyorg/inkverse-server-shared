@@ -3,10 +3,6 @@ import { camelCase, mapKeys } from 'lodash-es';
 const adminUserIdsSet = new Set(JSON.parse(process.env.ADMIN_USER_IDS || '[]'));
 const MAX_PG_INT = 2147483647;
 
-export const inkverseApiUrl = process.env.NODE_ENV === 'production' 
-	? 'https://api-v2.inkverse.co/api'
-	: 'http://inkverse.test:3010/api';
-
 function removeHttpFromUrl(url: string) {
   return url.replace(/^https?:\/\//, '');
 }

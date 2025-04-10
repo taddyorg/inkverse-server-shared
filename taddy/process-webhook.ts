@@ -83,7 +83,7 @@ async function processComicSeriesWebhook(body: TaddyWebhook): Promise<void> {
     case 'deleted': {
       const deletedComicSeries = await ComicSeries.deleteComicSeries(data);
 
-      if (!deletedComicSeries) {
+      if (!deletedComicSeries || !deletedComicSeries.uuid) {
         throw new Error('processComicSeriesWebhook - deleted - deletedComicSeries not found', data.uuid);
       }
 
@@ -169,7 +169,7 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
     case 'deleted': {
       const deletedComicIssue = await ComicIssue.deleteComicIssue(data);
 
-      if (!deletedComicIssue) {
+      if (!deletedComicIssue || !deletedComicIssue.uuid) {
         throw new Error('processComicIssueWebhook - deleted - deletedComicIssue not found', data.uuid);
       }
 
@@ -219,7 +219,7 @@ async function processCreatorWebhook(body: TaddyWebhook): Promise<void> {
     case 'deleted': {
       const deletedCreator = await Creator.deleteCreator(data);
 
-      if (!deletedCreator) {
+      if (!deletedCreator || !deletedCreator.uuid) {
         throw new Error('processCreatorWebhook - deleted - creatorUuid not found', data.uuid );
       }
 

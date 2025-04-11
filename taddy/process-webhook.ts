@@ -65,7 +65,7 @@ async function processComicSeriesWebhook(body: TaddyWebhook): Promise<void> {
 
       await Promise.allSettled([
         purgeCacheOnCdn({ type: 'comicseries', id: comicseries.uuid, shortUrl: comicseries.shortUrl }),
-        purgeCacheOnCdn({ type: 'recentlyAdded', id: 'recently-added' }),
+        purgeCacheOnCdn({ type: 'recentlyAdded' }),
       ])
       return;
     }
@@ -128,9 +128,9 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
       // purge cache
       await Promise.allSettled([
         comicseries ? purgeCacheOnCdn({ type: 'comicseries', id: comicseries.uuid, shortUrl: comicseries.shortUrl }) : [],
-        purgeCacheOnCdn({ type: 'comicissue', id: comicissue.uuid }),
+        purgeCacheOnCdn({ type: 'comicissue', id: comicissue.uuid, seriesUuid: comicseries?.uuid, shortUrl: comicseries?.shortUrl, name: comicseries?.name || undefined }),
         comicstories.length > 0 ? purgeMultipleCacheOnCdn({ type: 'comicstory', ids: comicstories.map(story => story.uuid) }) : [],
-        purgeCacheOnCdn({ type: 'recentlyUpdated', id: 'recently-updated' }),
+        purgeCacheOnCdn({ type: 'recentlyUpdated' }),
       ])
 
       // push notification
@@ -160,7 +160,7 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
       
       await Promise.allSettled([
         comicseries ? purgeCacheOnCdn({ type: 'comicseries', id: comicseries.uuid, shortUrl: comicseries.shortUrl }) : [],
-        purgeCacheOnCdn({ type: 'comicissue', id: comicissue.uuid }),
+        purgeCacheOnCdn({ type: 'comicissue', id: comicissue.uuid, seriesUuid: comicseries?.uuid, shortUrl: comicseries?.shortUrl, name: comicseries?.name || undefined }),
         comicstories.length > 0 ? purgeMultipleCacheOnCdn({ type: 'comicstory', ids: comicstories.map(story => story.uuid) }) : [],
       ])
 
@@ -183,7 +183,7 @@ async function processComicIssueWebhook(body: TaddyWebhook) {
 
       await Promise.allSettled([
         comicseries ? purgeCacheOnCdn({ type: 'comicseries', id: comicseries.uuid, shortUrl: comicseries.shortUrl }) : [],
-        purgeCacheOnCdn({ type: 'comicissue', id: uuid }),
+        purgeCacheOnCdn({ type: 'comicissue', id: uuid, seriesUuid: comicseries?.uuid, shortUrl: comicseries?.shortUrl, name: comicseries?.name || undefined }),
         storyUuids ? purgeMultipleCacheOnCdn({ type: 'comicstory', ids: storyUuids }) : [],
       ])
       return;

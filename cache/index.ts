@@ -8,6 +8,7 @@ export type CacheType =
   'sitemap' |
   'comicseries' |
   'comicissue' |
+  'comicissueforseries' |
   'comicstory' |
   'creator' |
   'creatorcontent' |
@@ -20,9 +21,10 @@ interface PurgeCacheParams {
   ids?: string[];
   shortUrl?: string;
   name?: string;
+  seriesUuid?: string;
 }
 
-export async function purgeCacheOnCdn({ type, id, shortUrl, name }: PurgeCacheParams) {
+export async function purgeCacheOnCdn({ type, id, shortUrl, name, seriesUuid }: PurgeCacheParams) {
   if (process.env.NODE_ENV !== "production") {
     console.log('LocalHost purgeCacheOnCdn', type, id, shortUrl, name);
   }
@@ -31,25 +33,34 @@ export async function purgeCacheOnCdn({ type, id, shortUrl, name }: PurgeCachePa
     case 'documentation':
     case 'comicseries':
     case 'creator':
-    case 'recentlyAdded':
-    case 'recentlyUpdated':
+    case 'comicstory':
+    case 'creatorcontent':
       if (!id) { throw new Error('purgeCacheOnCdn - id is required for type: ' + type); }
-
       await purgeApiCache(type, id)
       await purgeWebsiteCache(type, id, shortUrl, name)
+      return
+    case 'comicissue':
+      if (!id) { throw new Error('purgeCacheOnCdn - id is required for type: ' + type); }
+      if (!seriesUuid) { throw new Error('purgeCacheOnCdn - seriesUuid is required for type: ' + type); }
+      await purgeApiCache(type, id)
+      await purgeApiCache('comicissueforseries', seriesUuid)
+      await purgeWebsiteCache(type, id, shortUrl, name, seriesUuid)
       return
     case 'everything':
       await purgeApiCache(type, "")
       await purgeWebsiteCache(type)
       return 
-    case 'comicissue':
-    case 'comicstory':
-    case 'creatorcontent':
-      if (!id) { throw new Error('purgeCacheOnCdn - id is required for type: ' + type); }
-
-      return await purgeApiCache(type, id)
+    case 'recentlyAdded':
+      await purgeApiCache(type, 'recently-added')
+      await purgeWebsiteCache(type, 'recently-added')
+      return
+    case 'recentlyUpdated':
+      await purgeApiCache(type, 'recently-updated')
+      await purgeWebsiteCache(type, 'recently-updated')
+      return
     case 'sitemap':
-      return await purgeWebsiteCache(type, id, shortUrl, name)
+      await purgeWebsiteCache(type, id, shortUrl, name)
+      return
     default:
       throw new Error(`inside purgeEvent() - Dont have logic for type: ${type}`)
   }
@@ -64,8 +75,6 @@ export async function purgeMultipleCacheOnCdn({ type, ids }: PurgeCacheParams) {
     case 'comicissue':
     case 'comicstory':
     case 'creatorcontent':
-    case 'recentlyAdded':
-    case 'recentlyUpdated':
       if (!ids) { throw new Error('purgeMultipleCacheOnCdn - ids is required for type: ' + type); }
 
       await purgeMultipleOnCdn(type, ids)
@@ -101,6 +110,12 @@ function getGraphCDNQuery(type: CacheType) {
           purgeComicIssue(uuid: $uuid)
         }
       `
+    case 'comicissueforseries':
+      return `
+        mutation ComicIssueForSeriesPurge ($seriesUuid: [ID!]) {
+          purgeComicIssueForSeries(seriesUuid: $seriesUuid)
+        }
+      `
     case 'comicstory':
       return `
         mutation ComicStoryPurge ($uuid: [ID!]) {
@@ -122,7 +137,7 @@ function getGraphCDNQuery(type: CacheType) {
     case 'recentlyAdded':
     case 'recentlyUpdated':
       return `
-        mutation HomeScreenComicSeriesPurge ($id: ID!) {
+        mutation HomeScreenComicSeriesPurge ($id: [ID!]) {
           purgeHomeScreenComicSeries(id: $id)
         }
       `
@@ -141,9 +156,12 @@ function getGraphCDNVariables(type: CacheType, id?:string, ids?:string[]) {
     case 'comicstory':
     case 'creator':
     case 'creatorcontent':
+      return { uuid: ids || [id] }
+    case 'comicissueforseries':
+      return { seriesUuid: ids || [id] }
     case 'recentlyAdded':
     case 'recentlyUpdated':
-      return { uuid: ids || [id] }
+      return { id: [id] }
     default:
       throw new Error(`inside getGraphCDNVariables() - Dont have logic for type: ${type}`)
   }
@@ -179,10 +197,17 @@ async function purgeMultipleOnCdn(type: CacheType, ids:string[]) {
   }
 }
 
-async function purgeWebsiteCache(type: CacheType, id?:string, shortUrl?:string, name?:string) {
+async function purgeWebsiteCache(type: CacheType, id?:string, shortUrl?:string, name?:string, seriesUuid?:string) {
   try {
     if (process.env.NODE_ENV !== "production") {
       console.log('LocalHost purgeWebsiteCache', type, id, shortUrl, name);
+      return;
+    }
+
+    const data = getCloudflareDataObject(type, id, shortUrl, name, seriesUuid)
+
+    if (!data) {
+      console.log('purgeWebsiteCache - No data to purge', type, id, shortUrl, name);
       return;
     }
 
@@ -194,7 +219,7 @@ async function purgeWebsiteCache(type: CacheType, id?:string, shortUrl?:string, 
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
       },
-      data: getCloudflareDataObject(type, id, shortUrl, name)
+      data
     };
 
     await axios(options);
@@ -203,24 +228,43 @@ async function purgeWebsiteCache(type: CacheType, id?:string, shortUrl?:string, 
   }
 }
 
-function getCloudflareDataObject(type: CacheType, id?:string, shortUrl?:string, name?:string) {
+function getCloudflareDataObject(type: CacheType, id?:string, shortUrl?:string, name?:string, seriesUuid?:string): { purge_everything: boolean } | { files: string[] } | null {
   switch (type) {
     case 'everything':
     case 'documentation':
       return { purge_everything: true }
     case 'comicseries':
-      return { files: [`${inkverseWebsiteUrl}${getInkverseUrl({ type: 'comicseries', shortUrl })}`] }
     case 'comicissue':
-      return { files: [`${inkverseWebsiteUrl}${getInkverseUrl({ type: 'comicissue', shortUrl, name, uuid: id })}`] }
     case 'creator':
-      return { files: [`${inkverseWebsiteUrl}${getInkverseUrl({ type: 'creator', shortUrl })}`] }
     case 'sitemap':
-      return { files: [`https://ink0.inkverse.co/sitemap/${id}`] }
     case 'recentlyAdded':
     case 'recentlyUpdated':
-      return { files: [`${inkverseWebsiteUrl}`] }
+      return { files: [urlToPurge(type, id, shortUrl, name)] }
+    case 'comicstory':
+    case 'creatorcontent':
+      return null;
     default:
       throw new Error(`inside getCloudflareDataObject() - Dont have logic for type: ${type}`)
+  }
+}
+
+function urlToPurge(type: CacheType, id?:string, shortUrl?:string, name?:string, seriesUuid?:string) {
+  switch (type) {
+    case 'comicseries':
+      return `${inkverseWebsiteUrl}${getInkverseUrl({ type: 'comicseries', shortUrl })}`
+    case 'comicissue':
+      return `${inkverseWebsiteUrl}${getInkverseUrl({ type: 'comicissue', shortUrl, name, uuid: id })}`
+    case 'creator':
+      return `${inkverseWebsiteUrl}${getInkverseUrl({ type: 'creator', shortUrl })}`
+    case 'creatorcontent':
+      return `${inkverseWebsiteUrl}${getInkverseUrl({ type: 'creator', shortUrl })}`
+    case 'recentlyAdded':
+    case 'recentlyUpdated':
+      return `${inkverseWebsiteUrl}`
+    case 'sitemap':
+      return `https://ink0.inkverse.co/sitemap/${id}`
+    default:
+      throw new Error(`inside getURLsToPurge() - Dont have logic for type: ${type}`)
   }
 }
 
